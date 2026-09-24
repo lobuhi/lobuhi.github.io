@@ -1,0 +1,1622 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jalifa 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Aref+Ruqaa:wght@400;700&family=Amiri:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#EFE5CF; --surface:#FBF7EE; --surface2:#F3EBDA; --ink:#2B1D12; --muted:#735F4A; --line:#DCCBA8;
+  --green:#1E6B52; --cobalt:#23508E; --terra:#A8452A; --gold:#B8891A; --good:#1E6B52; --bad:#A8452A;
+  --co:#23508E; --soc:#1E6B52; --card:#B8891A; --sp:#A8452A;
+  --shadow:0 1px 2px rgba(60,36,12,.12),0 10px 28px rgba(60,36,12,.12);
+  --f-display:"El Messiri","Georgia",serif;
+  --f-body:"Alegreya Sans","Segoe UI",system-ui,sans-serif;
+  --f-cal:"Aref Ruqaa","Amiri","Traditional Arabic",serif;
+  --band:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Crect width='28' height='14' fill='%2323508E'/%3E%3Cpolygon points='7,1 8.6,5.4 13,7 8.6,8.6 7,13 5.4,8.6 1,7 5.4,5.4' fill='%23E9D59A'/%3E%3Cpolygon points='21,1 22.6,5.4 27,7 22.6,8.6 21,13 19.4,8.6 15,7 19.4,5.4' fill='%231E6B52'/%3E%3Ccircle cx='14' cy='7' r='1.3' fill='%23E9D59A'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#121815; --surface:#1A221E; --surface2:#212B26; --ink:#F0E6D0; --muted:#AE9F86; --line:#34403A;
+    --green:#4DB38F; --cobalt:#86A8E0; --terra:#E27B5E; --gold:#E0B84A; --good:#5CC79E; --bad:#EE8468;
+    --co:#86A8E0; --soc:#4DB38F; --card:#E0B84A; --sp:#E27B5E;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#121815; --surface:#1A221E; --surface2:#212B26; --ink:#F0E6D0; --muted:#AE9F86; --line:#34403A;
+  --green:#4DB38F; --cobalt:#86A8E0; --terra:#E27B5E; --gold:#E0B84A; --good:#5CC79E; --bad:#EE8468;
+  --co:#86A8E0; --soc:#4DB38F; --card:#E0B84A; --sp:#E27B5E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.4}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.app{padding-inline:16px;padding-block:0 24px;max-width:1480px;margin:0 auto}
+.band{height:12px;background:var(--band);background-size:28px 12px;border-radius:0 0 3px 3px;margin-bottom:10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:32px;line-height:1;margin:0;color:var(--ink);letter-spacing:.01em}
+.brand .ar{font-family:var(--f-cal);font-size:30px;line-height:1;color:var(--gold)}
+.brand small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:500;font-size:14px}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#FBF7EE;font-weight:700}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#241807;font-weight:700}
+.btn.terra{background:var(--terra);border-color:var(--terra);color:#FBF7EE;font-weight:700}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.small{padding:4px 9px;font-size:13px}
+select.btn{width:auto}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+@media (max-width:1050px){.layout{grid-template-columns:minmax(0,1fr)}}
+.boardcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.status{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;grid-template-columns:auto auto 1fr auto;gap:8px 18px;align-items:center}
+@media (max-width:700px){.status{grid-template-columns:1fr auto}}
+.turn{display:flex;align-items:center;gap:10px}
+.turn .pawn{width:30px;height:30px;font-size:14px}
+.turn small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.turn b{font-family:var(--f-display);font-size:19px;font-weight:600}
+.dice{display:flex;gap:8px;align-items:center}
+.die{width:34px;height:34px;background:#FBF4E2;border:1px solid #CDB88A;border-radius:7px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:5px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+.die span{width:6px;height:6px;border-radius:50%;background:#2B1D12;place-self:center;visibility:hidden}
+.die span.on{visibility:visible}
+.die.special{display:grid;place-items:center;grid-template-columns:1fr;grid-template-rows:1fr;padding:3px;background:#F4ECD8;border-color:var(--gold)}
+.die.special svg{width:24px;height:24px}
+.die.roll{animation:shake .12s linear infinite}
+@keyframes shake{0%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}100%{transform:rotate(-9deg)}}
+.dlabel{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;max-width:70px;line-height:1.1}
+.srow{display:flex;gap:16px;justify-content:flex-end;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.srow b{display:block;font-family:var(--f-display);font-size:19px;color:var(--ink);letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums;font-weight:600}
+.event{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:8px;font-size:14.5px;min-height:1.4em}
+.event .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:800;margin-right:6px}
+
+.boardwrap{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
+#board{display:block;width:100%;height:auto;max-height:calc(100vh - 210px);touch-action:manipulation}
+#board text{font-family:var(--f-body)}
+#board .plot{cursor:pointer}
+#board .plot:hover .plotbg{stroke:#B8891A;stroke-width:2.5}
+#board .rc{cursor:pointer}
+#board .cand .candring{display:block}
+#board .candring{display:none;fill:none;stroke:#B8891A;stroke-width:4;animation:pulse 1s ease-in-out infinite alternate}
+#board .sel .candring{stroke:#1E6B52;stroke-dasharray:none;animation:none;stroke-width:5}
+@keyframes pulse{from{stroke-opacity:.35}to{stroke-opacity:1}}
+#board .tut-hl{stroke:#B8891A!important;stroke-width:6!important;animation:pulse .8s ease-in-out infinite alternate}
+#board .curcell{fill:none;stroke:#B8891A;stroke-width:3.5}
+.pl-meta{font-size:8.5px}
+@media (max-width:640px){#board .pl-meta,#board .rc-name{display:none}}
+@media (prefers-reduced-motion:reduce){.die.roll,#board .candring,#board .tut-hl{animation:none}}
+
+.side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.panel h2{font-family:var(--f-display);font-weight:600;font-size:15px;margin:0 0 8px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.panel h2::before{content:"";width:11px;height:11px;background:var(--gold);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
+.actions{display:flex;flex-direction:column;gap:8px}
+.actions .row{display:flex;gap:8px;flex-wrap:wrap}
+.actions .big{font-size:17px;padding:11px 14px;flex:1}
+.hint{font-size:13.5px;color:var(--muted)}
+.players{display:flex;flex-direction:column;gap:8px}
+.pawn{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50% 50% 45% 45%;background:var(--pc);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);color:#fff;font-size:12px;font-weight:800;line-height:1;flex:none}
+.pcard{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--surface);display:grid;grid-template-columns:auto 1fr auto;gap:3px 10px;align-items:center}
+.pcard.active{border-color:var(--pc);box-shadow:0 0 0 2px color-mix(in srgb,var(--pc) 35%,transparent)}
+.pcard .who b{font-size:15px}
+.pcard .who small{display:block;color:var(--muted);font-size:12px}
+.pcard .score{text-align:right}
+.pcard .score b{font-family:var(--f-display);font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+.pcard .score small{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.meta{grid-column:1/-1;display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.meta .cash{color:var(--ink);font-weight:700}
+.meta .debt{color:var(--bad);font-weight:700}
+.chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.chip{border:1px solid var(--line);border-left:4px solid var(--cat);background:var(--surface2);border-radius:5px;padding:1px 6px;font-size:12px;--cat:var(--co);cursor:pointer;font:inherit;font-size:12px}
+.chip.soc{--cat:var(--soc)}
+.chip .lv{letter-spacing:1px;color:var(--gold);margin-left:3px}
+.chip .q{font-variant-numeric:tabular-nums;color:var(--muted);margin-left:3px}
+.deeds{grid-column:1/-1;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.tray8{display:grid;grid-template-columns:repeat(8,10px);gap:2px}
+.tray8 i{width:10px;height:10px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--owner) 70%,var(--ink))}
+.tray8 i.on{background:var(--owner)}
+.pbtns{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.log{max-height:260px;overflow:auto;font-size:13px;display:flex;flex-direction:column;gap:3px}
+.log div{padding:3px 0;border-bottom:1px dashed var(--line)}
+.log div:first-child{font-weight:700}
+.log .money{color:var(--good)} .log .pay{color:var(--bad)} .log .q{color:var(--soc)}
+
+.overlay{position:fixed;inset:0;background:rgba(30,18,6,.55);display:grid;place-items:center;padding:16px;z-index:50;overflow:auto}
+.sheet{background:var(--surface);color:var(--ink);border-radius:16px;box-shadow:var(--shadow);width:min(780px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:0 24px 22px}
+.sheet::before{content:"";display:block;height:10px;margin:0 -24px 20px;background:var(--band);background-size:28px 10px}
+.sheet.wide{width:min(1020px,100%)}
+.sheet h2{font-family:var(--f-display);font-weight:700;font-size:28px;margin:0 0 4px}
+.sheet h3{font-family:var(--f-display);font-weight:600;font-size:19px;margin:20px 0 8px;color:var(--green)}
+.sheet p{max-width:68ch}
+.lead{color:var(--muted);margin:0 0 16px}
+.seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.seat{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;border-top:5px solid var(--pc)}
+.seat label,.field label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+input[type=text],input[type=number],select{font:inherit;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 8px;width:100%}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{border:1px solid var(--line);border-radius:9px;padding:8px 12px;display:flex;gap:8px;align-items:flex-start;cursor:pointer;flex:1;min-width:180px}
+.seg label:has(input:checked){border-color:var(--green);background:color-mix(in srgb,var(--green) 9%,var(--surface))}
+.seg input{accent-color:var(--green);margin-top:3px}
+.seg small{display:block;color:var(--muted)}
+.toggles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.toggle{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:14px}
+.toggle input{margin-top:3px;accent-color:var(--green)}
+.toggle small{display:block;color:var(--muted)}
+.sheet-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}
+
+.gcard{border-radius:14px;overflow:hidden;background:var(--surface);border:1px solid var(--line);max-width:460px;margin:0 auto;--cat:var(--co)}
+.gcard.soc{--cat:var(--soc)} .gcard.rec,.gcard.suc{--cat:var(--card)} .gcard.sp{--cat:var(--sp)}
+.gcard-top{background:var(--cat);color:#fff;padding:14px 18px 12px;display:flex;align-items:center;gap:12px;position:relative}
+.gcard-top::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:6px;background:var(--band);background-size:24px 6px;opacity:.9}
+.gcard-top svg{width:42px;height:42px;flex:none}
+.gcard-top .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;font-weight:700}
+.gcard-top h3{margin:2px 0 0;font-family:var(--f-display);font-weight:600;font-size:21px;line-height:1.15;color:#fff}
+.gcard-body{padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px}
+.gcard-body q{font-family:"Amiri",Georgia,serif;font-size:18px;font-style:italic;quotes:"«" "»";line-height:1.45}
+.gcard-body cite{font-style:normal;color:var(--muted);font-size:13px}
+.gcard-body .fx{border-top:1px dashed var(--line);padding-top:10px;font-weight:500}
+.figs{display:flex;gap:6px;justify-content:space-between;background:linear-gradient(#EFE2BF,#E3CF9C);border-radius:10px;padding:8px 6px 4px}
+.figs figure{margin:0;flex:1;text-align:center;font-size:11.5px;color:#4A3522;line-height:1.15}
+.figs figure.done{opacity:1}
+.figs figure.todo{opacity:.55}
+.figs svg{width:100%;height:auto;max-width:110px;display:block;margin:0 auto 3px}
+.rows{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
+.rows span:nth-child(even){font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.modal-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.modal-sheet{width:min(500px,100%);padding:0 18px 18px}
+.modal-sheet::before{margin:0 -18px 16px}
+.permit{display:flex;align-items:center;gap:14px;justify-content:center;padding:6px 0}
+.permit .face{width:70px;height:70px;border-radius:14px;background:#F4ECD8;border:2px solid var(--gold);display:grid;place-items:center}
+.permit .face svg{width:46px;height:46px}
+.permit b{font-family:var(--f-display);font-size:22px;display:block}
+
+.rules h3{color:var(--green)}
+.rules ul{padding-left:20px;margin:6px 0} .rules li{margin:4px 0;max-width:74ch}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green);border-radius:4px;padding:1px 6px;margin-right:4px;vertical-align:1px}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpi{border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.kpi b{display:block;font-family:var(--f-display);font-size:22px;font-weight:600}
+.kpi small{color:var(--muted);font-size:12px}
+.progress{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:10px 0}
+.progress i{display:block;height:100%;background:var(--green);width:0}
+.rank{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.rank .r{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+.rank .r.win{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--surface))}
+.rank .r > b{font-family:var(--f-display);font-size:24px;margin-left:auto}
+
+.scenewrap{position:relative;height:clamp(440px,calc(100vh - 200px),920px);border-radius:14px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:radial-gradient(ellipse at 50% 40%,#7A5236 0%,#4A3020 60%,#2E1D12 100%)}
+@media (max-width:700px){.scenewrap{height:62vh}}
+.scenewrap canvas{display:block;touch-action:none;cursor:grab}
+.camctl{position:absolute;top:10px;left:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+.camctl .btn{background:rgba(251,247,238,.9);color:#2B1D12;border-color:rgba(0,0,0,.15)}
+.camctl .btn[aria-pressed="true"]{background:#1E6B52;color:#FBF7EE}
+.scenehint{position:absolute;right:10px;bottom:8px;font-size:12px;color:#F3E6C8;opacity:.8;pointer-events:none;text-align:right}
+@media (max-width:700px){.scenehint{display:none}}
+.noweb{color:#F3E6C8;padding:24px;max-width:48ch}
+.hand{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mcard{width:66px;height:92px;border-radius:7px;border:1px solid var(--line);background:#FBF4E2;color:#2B1D12;padding:0;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.18);transition:transform .15s;--cat:#23508E;font:inherit;text-align:center}
+.mcard.soc{--cat:#1E6B52}
+.mcard:hover{transform:translateY(-3px) rotate(-1.5deg)}
+.mc-top{background:var(--cat);color:#fff;display:grid;place-items:center;height:28px;border-bottom:3px solid #C9A227}
+.mc-top svg{width:18px;height:18px}
+.mc-name{font-size:10.5px;font-weight:800;line-height:1.1;padding:4px 3px 0;flex:1;color:var(--cat);overflow-wrap:anywhere}
+.mc-lv{display:flex;gap:3px;justify-content:center}
+.mc-lv i{width:12px;height:5px;border-radius:2px;background:#E0D2AE}
+.mc-lv i.on{background:#C9A227}
+.mc-foot{font-size:10.5px;font-weight:700;padding:3px 0 4px;font-variant-numeric:tabular-nums;color:#5B4330}
+@media (prefers-reduced-motion:reduce){.mcard{transition:none}}
+/* tutorial */
+.tut{position:fixed;right:16px;bottom:16px;width:min(420px,calc(100% - 32px));z-index:60;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 40px rgba(30,18,6,.35);overflow:hidden}
+.tut-top{background:var(--green);color:#FBF7EE;padding:12px 16px 10px;position:relative}
+.tut-top::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:8px;background:var(--band);background-size:28px 8px}
+.tut-top .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.85}
+.tut-top h3{margin:2px 0 0;font-family:var(--f-display);font-size:21px;font-weight:600;line-height:1.2}
+.tut-body{padding:18px 16px 8px;font-size:14.5px;max-height:48vh;overflow:auto}
+.tut-body p{margin:0 0 8px}
+.tut-body ul{margin:0 0 8px;padding-left:18px}
+.tut-foot{display:flex;align-items:center;gap:8px;padding:10px 16px 14px}
+.tut-foot .dots{display:flex;gap:4px;margin-right:auto}
+.tut-foot .dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.tut-foot .dots i.on{background:var(--green)}
+.tut-hl-html{outline:3px solid var(--gold)!important;outline-offset:3px;border-radius:12px;animation:hlpulse .9s ease-in-out infinite alternate}
+@keyframes hlpulse{from{outline-color:color-mix(in srgb,var(--gold) 35%,transparent)}to{outline-color:var(--gold)}}
+.illus{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;background:linear-gradient(#EFE2BF,#E3CF9C);border-radius:10px;padding:8px;margin:6px 0 10px;color:#3B2A1A;font-size:12px;text-align:center}
+.illus svg{display:block;margin:0 auto 2px}
+@media (max-width:640px){.tut{right:8px;left:8px;bottom:8px;width:auto}.tut-body{max-height:36vh}.tut-foot .dots{display:none}.tut-foot{justify-content:flex-end}}
+</style>
+
+</head><body style="margin:0">
+<div class="app" lang="es">
+  <div class="band"></div>
+  <header class="top">
+    <div class="brand"><span class="ar" aria-hidden="true">خليفة</span><div><h1>Jalifa</h1><small>Prototipo v0.3 · mesa en 3D</small></div></div>
+    <div class="toolbar">
+      <button class="btn gold" id="btnTut">Tutorial</button>
+      <button class="btn" id="btnRules">Reglas</button>
+      <button class="btn" id="btnLab">Laboratorio</button>
+      <button class="btn" id="btnPause">Pausa</button>
+      <select class="btn" id="speedSel" aria-label="Velocidad de la IA">
+        <option value="1">IA: normal</option><option value="0.45">IA: rápida</option><option value="0.12">IA: turbo</option>
+      </select>
+      <button class="btn" id="btnNew">Nueva partida</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="boardcol">
+      <div class="status" id="status">
+        <div class="turn" id="turnbox"></div>
+        <div class="dice"><div class="die" id="d1"></div><div class="die" id="d2"></div><div class="die special" id="d3" title="Dado del Diwan / estancia"></div><span class="dlabel" id="d3l">Dado del Diwan</span></div>
+        <div></div>
+        <div class="srow"><span>Ronda<b id="roundN">–</b></span><span id="clockBox" hidden>Tiempo<b id="clockT">–</b></span><span>Bayt al-Mal<b id="bmPot">0</b></span></div>
+        <div class="event" id="event" aria-live="polite"></div>
+      </div>
+      <div class="scenewrap" id="scene" aria-label="Mesa de juego en 3D"><div class="camctl"><button class="btn small" id="v3d">Vista 3D</button><button class="btn small" id="vtop">Cenital</button><button class="btn small" id="vfollow" aria-pressed="false">Seguir turno</button></div><div class="scenehint">Arrastra para girar · rueda para acercar · toca un solar para ver su tarjeta</div></div>
+    </section>
+    <aside class="side">
+      <div class="panel" id="actionsPanel"><h2>Acciones</h2><div class="actions" id="actions"></div></div>
+      <div class="panel" id="playersPanel"><h2>Jugadores</h2><div class="players" id="players"></div></div>
+      <div class="panel"><h2>Crónica</h2><div class="log" id="log"></div></div>
+    </aside>
+  </main>
+</div>
+
+<div class="overlay" id="modal" hidden><div class="sheet modal-sheet" id="modalBody"></div></div>
+<div class="overlay" id="setup" hidden><div class="sheet" id="setupBody"></div></div>
+<div class="overlay" id="rules" hidden><div class="sheet rules" id="rulesBody"></div></div>
+<div class="overlay" id="lab" hidden><div class="sheet wide" id="labBody"></div></div>
+<div class="tut" id="tut" hidden role="dialog" aria-label="Tutorial"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ====================== MOTOR DE JALIFA ====================== */
+const R5 = x => Math.max(5, Math.round(x / 5) * 5);
+const GW = 13, GH = 11;
+const ROAD = [[1,9],[1,8],[1,7],[1,6],[1,5],[1,4],[1,3],[1,2],[1,1],[2,1],[3,1],[4,1],[5,1],[5,2],[5,3],[5,4],[5,5],[6,5],[7,5],[7,4],[7,3],[7,2],[7,1],[8,1],[9,1],[10,1],[11,1],[11,2],[11,3],[11,4],[11,5],[11,6],[11,7],[11,8],[11,9],[10,9],[9,9],[8,9],[7,9],[6,9],[5,9],[4,9],[3,9],[2,9]];
+const N = ROAD.length;
+const SPECIAL_AT = {0:'start',4:'plane',8:'wait',10:'train',14:'rec',17:'diwan',21:'suc',24:'sadaqa',26:'wait',30:'plane',32:'rec',34:'bm',36:'freedoor',37:'train',39:'diwan',43:'suc'};
+const SPECIAL_INFO = {
+  start:{name:'Bab al-Madina', short:'Salida', ar:'باب المدينة', icon:'gate', desc:'La puerta de la ciudad. Cada vez que pasas o caes aquí cobras tu sueldo y, si llegas al nisab, pagas el zakat.'},
+  diwan:{name:'Diwan', short:'Diwan', ar:'الديوان', icon:'seal', desc:'La oficina de licencias. Aquí puedes construir en cualquiera de tus solares y comprar puertas para cualquiera de tus edificios.'},
+  bm:{name:'Bayt al-Mal', short:'Bayt al-Mal', ar:'بيت المال', icon:'treasury', desc:'El tesoro público. Se llena con el zakat y la sadaqa. Si caes aquí con deudas, paga lo que pueda de ellas. Si tienes menos de 150, te da hasta 100.'},
+  freedoor:{name:'Puerta libre', short:'Puerta libre', icon:'arch', desc:'Coloca gratis una puerta en uno de tus edificios.'},
+  rec:{name:'Recordatorio', short:'Recordatorio', icon:'book', desc:'Roba una carta con una aleya o un hadiz. Algunas te invitan a dar caridad o a condonar una deuda.'},
+  suc:{name:'Sucesos', short:'Sucesos', icon:'bolt', desc:'Roba una carta de Sucesos: beneficia a unos y perjudica a otros.'},
+  wait:{name:'Contratiempo', short:'Contratiempo', icon:'hourglass', desc:'Pierdes el próximo turno.'},
+  plane:{name:'Avión', short:'Avión', icon:'plane', desc:'Vuelas hasta el otro aeropuerto. No vuelves a tirar.'},
+  train:{name:'Tren', short:'Tren', icon:'train', desc:'Viajas hasta la otra estación. No vuelves a tirar.'},
+  sadaqa:{name:'Sadaqa', short:'Sadaqa', ar:'صدقة', icon:'hand', desc:'Puedes donar al Bayt al-Mal y ganar un quesito de buenas obras. Con deudas no se puede.'},
+};
+const PLOT_DEFS = [
+  {key:'electro', t:'co', name:'Electrodomésticos', x:0,y:1,w:1,h:3, v:140, icon:'washer', stages:['Tienda','Almacén','Servicio técnico'], svc:'Se te estropea la lavadora y compras otra.'},
+  {key:'comedor', t:'soc', name:'Comedor social', x:0,y:4,w:1,h:3, v:140, icon:'bowl', stages:['Cocina','Sala comedor','Reparto a domicilio']},
+  {key:'super', t:'co', name:'Supermercado', x:0,y:7,w:1,h:3, v:120, icon:'basket', stages:['Tienda','Supermercado','Hipermercado'], svc:'Haces la compra de la semana.'},
+  {key:'banco', t:'soc', name:'Banco de alimentos', x:1,y:0,w:2,h:1, v:140, icon:'crate', stages:['Almacén','Cámara frigorífica','Punto de reparto']},
+  {key:'transportes', t:'co', name:'Transportes', x:3,y:0,w:3,h:1, v:150, icon:'truck', stages:['Cochera','Estación de autobuses','Flota de camiones'], svc:'Usas el autobús y envías mercancía.'},
+  {key:'biblioteca', t:'soc', name:'Biblioteca', x:6,y:0,w:3,h:1, v:160, icon:'books', stages:['Sala de lectura','Archivo de manuscritos','Casa de la Sabiduría']},
+  {key:'electronica', t:'co', name:'Electrónica', x:9,y:0,w:3,h:1, v:160, icon:'devices', stages:['Tienda','Taller','Laboratorio'], svc:'Compras un móvil nuevo.'},
+  {key:'jardin', t:'soc', name:'Reforestación · jardín botánico', short:'Jardín botánico', x:12,y:1,w:1,h:3, v:180, icon:'tree', stages:['Vivero','Invernadero','Jardín de acequias']},
+  {key:'coches', t:'co', name:'Concesionario de coches', short:'Concesionario', x:12,y:4,w:1,h:3, v:170, icon:'car', stages:['Exposición','Taller','Concesionario oficial'], svc:'Pasas la revisión del coche.'},
+  {key:'polideportivo', t:'soc', name:'Polideportivo', x:12,y:7,w:1,h:3, v:190, icon:'ball', stages:['Pista','Piscina','Estadio']},
+  {key:'ropa', t:'co', name:'Ropa y zapatos', x:1,y:10,w:3,h:1, v:120, icon:'shirt', stages:['Tienda','Taller de costura','Fábrica'], svc:'Renuevas ropa y calzado.'},
+  {key:'jubilados', t:'soc', name:'Espacio para jubilados', short:'Espacio jubilados', x:4,y:10,w:3,h:1, v:160, icon:'elder', stages:['Sala de estar','Centro de día','Jardín terapéutico']},
+  {key:'constructora', t:'co', name:'Constructora', x:7,y:10,w:3,h:1, v:180, icon:'crane', stages:['Oficina','Almacén de materiales','Grúas y maquinaria'], svc:'Reformas tu casa.'},
+  {key:'mensajeria', t:'co', name:'Mensajería', x:10,y:10,w:2,h:1, v:130, icon:'parcel', stages:['Oficina','Almacén','Centro logístico'], svc:'Envías un paquete.'},
+  {key:'mezquita', t:'soc', name:'Mezquita de Estambul', short:'Mezquita', x:6,y:1,w:1,h:4, v:280, icon:'mosque', stages:['Sala de oración','Patio con fuente','Cúpula y minarete']},
+  {key:'universidad', t:'soc', name:'Universidad islámica de Samarcanda', short:'Universidad', x:2,y:2,w:3,h:2, v:260, icon:'uni', stages:['Aulas','Madrasa y biblioteca','Observatorio']},
+  {key:'ninos', t:'soc', name:'Espacio de ocio para niños', short:'Ocio infantil', x:2,y:4,w:3,h:2, v:150, icon:'kite', stages:['Ludoteca','Parque infantil','Teatro de títeres']},
+  {key:'animales', t:'soc', name:'Centro de acogida y protección de animales', short:'Protectora de animales', x:2,y:6,w:3,h:2, v:170, icon:'paw', stages:['Refugio','Clínica veterinaria','Parque']},
+  {key:'inmobiliaria', t:'co', name:'Inmobiliaria', x:2,y:8,w:3,h:1, v:190, icon:'key', stages:['Oficina','Promoción de pisos','Urbanización'], svc:'Alquilas un local.'},
+  {key:'hospital', t:'soc', name:'Hospital', x:8,y:2,w:3,h:2, v:240, icon:'crescent', stages:['Consultas','Bimaristán','Escuela de medicina']},
+  {key:'orfanato', t:'soc', name:'Orfanato', x:8,y:4,w:3,h:2, v:210, icon:'orphan', stages:['Hogar','Escuela','Huerto y patio']},
+  {key:'jovenes', t:'soc', name:'Espacio de ocio para jóvenes', short:'Ocio juvenil', x:8,y:6,w:3,h:2, v:170, icon:'pad', stages:['Local','Estudio de música','Pista y rocódromo']},
+  {key:'telecom', t:'co', name:'Telecomunicaciones', x:8,y:8,w:3,h:1, v:200, icon:'dish', stages:['Oficina','Centralita','Gran parabólica'], svc:'Pagas la fibra y el móvil.'},
+  {key:'albergue', t:'soc', name:'Albergue para personas sin techo y necesitadas', short:'Albergue', x:5,y:6,w:3,h:1, v:200, icon:'shelter', stages:['Dormitorios','Comedor','Talleres de empleo']},
+];
+const ROAD_AT = new Map(ROAD.map(([c,r],i)=>[c+','+r,i]));
+const PLOTS = PLOT_DEFS.map((d,k)=>{
+  const pl = Object.assign({i:k, short:d.short||d.name}, d);
+  pl.land = d.v;
+  pl.cost = [R5(d.v), R5(d.v*0.8), R5(d.v*0.8)];
+  pl.dir = {};
+  const s = new Set();
+  for(let c=d.x;c<d.x+d.w;c++) for(let r=d.y;r<d.y+d.h;r++) for(const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1]]){
+    const i = ROAD_AT.get((c+dc)+','+(r+dr));
+    if(i!=null){ s.add(i); if(!pl.dir[i]) pl.dir[i]=[-dc,-dr]; }
+  }
+  pl.roads = [...s].sort((a,b)=>a-b);
+  pl.slots = pl.roads.filter(i=>!SPECIAL_AT[i]);
+  return pl;
+});
+const KEY = Object.fromEntries(PLOTS.map(p=>[p.key,p.i]));
+const ADJ = Array.from({length:N},(_,i)=>PLOTS.filter(pl=>pl.roads.includes(i)).map(pl=>pl.i));
+function applyRates(R){ PLOTS.forEach(pl=>{ pl.rate = pl.t==='co' ? [R5(pl.v*0.06*R.rateMul), R5(pl.v*0.12*R.rateMul), R5(pl.v*0.2*R.rateMul)] : null; }); }
+
+const REMINDERS = [
+  {title:'Os pondré como jalifa', text:'Y cuando tu Señor dijo a los ángeles: «Voy a poner en la tierra un jalifa».', src:'Corán 2:30'},
+  {title:'Siete espigas', text:'El ejemplo de quienes gastan sus bienes en el camino de Allah es como el de un grano que produce siete espigas, y en cada espiga cien granos. Allah multiplica a quien quiere.', src:'Corán 2:261', offer:{type:'donate', cost:100}},
+  {title:'Dar tiempo al deudor', text:'Y si el deudor pasa apuros, concededle un plazo hasta que tenga holgura. Y si se lo perdonáis como caridad, es mejor para vosotros, si supierais.', src:'Corán 2:280', offer:{type:'forgive'}},
+  {title:'Por Su faz', text:'Y dan de comer, por amor a Él, al pobre, al huérfano y al cautivo: «Os alimentamos solo por la faz de Allah; no queremos de vosotros recompensa ni agradecimiento».', src:'Corán 76:8-9', offer:{type:'donate', cost:80}},
+  {title:'Comercio sí, usura no', text:'Allah ha hecho lícito el comercio y ha prohibido la usura.', src:'Corán 2:275'},
+  {title:'Lo que amáis', text:'No alcanzaréis la virtud hasta que gastéis de lo que amáis.', src:'Corán 3:92', offer:{type:'donate', cost:120}},
+  {title:'Cooperad en el bien', text:'Cooperad en la bondad y en el temor de Allah, y no cooperéis en el pecado y la agresión.', src:'Corán 5:2'},
+  {title:'El huérfano y el que pide', text:'En cuanto al huérfano, no lo oprimas. Y en cuanto al que pide, no lo rechaces.', src:'Corán 93:9-10'},
+  {title:'La medida justa', text:'¡Ay de los defraudadores! Los que, cuando reciben de la gente, exigen la medida completa, y cuando ellos miden o pesan para otros, dan de menos.', src:'Corán 83:1-3'},
+  {title:'A quién va el zakat', text:'Las sadaqas son para los pobres, los necesitados, quienes las administran, aquellos cuyos corazones hay que acercar, la liberación de cautivos, los endeudados, la causa de Allah y el viajero.', src:'Corán 9:60'},
+  {title:'La caridad no merma', text:'La caridad no disminuye la riqueza.', src:'Hadiz · Muslim 2588', offer:{type:'donate', cost:100}},
+  {title:'Sadaqa yariya', text:'Cuando la persona muere, sus obras se interrumpen salvo tres: una caridad continua, un conocimiento del que se sigan beneficiando o un hijo virtuoso que ruegue por ella.', src:'Hadiz · Muslim 1631'},
+  {title:'El tutor del huérfano', text:'Yo y quien se hace cargo de un huérfano estaremos así en el Paraíso —y juntó los dedos índice y corazón.', src:'Hadiz · Al-Bujari 5304'},
+  {title:'Para tu hermano', text:'Ninguno de vosotros cree de verdad hasta que desee para su hermano lo que desea para sí mismo.', src:'Hadiz · Al-Bujari 13'},
+  {title:'El salario del trabajador', text:'Dad al trabajador su salario antes de que se seque su sudor.', src:'Hadiz · Ibn Mayah 2443'},
+  {title:'Una sonrisa', text:'Tu sonrisa ante tu hermano es una caridad.', src:'Hadiz · At-Tirmidi 1956'},
+  {title:'Plantar un árbol', text:'Ningún musulmán planta un árbol o siembra una semilla de la que come un pájaro, una persona o un animal sin que ello cuente para él como caridad.', src:'Hadiz · Al-Bujari 2320'},
+  {title:'Todo ser vivo', text:'En hacer el bien a todo ser vivo hay recompensa.', src:'Hadiz · Al-Bujari y Muslim'},
+  {title:'Aliviar una angustia', text:'Quien alivia a un creyente de una angustia de este mundo, Allah le aliviará de una angustia del Día del Juicio. Y Allah ayuda al siervo mientras el siervo ayuda a su hermano.', src:'Hadiz · Muslim 2699'},
+  {title:'Construir una mezquita', text:'Quien construye una mezquita buscando la faz de Allah, Allah le construirá algo semejante en el Paraíso.', src:'Hadiz · Al-Bujari y Muslim'},
+  {title:'Mayores y pequeños', text:'No es de los nuestros quien no tiene misericordia de nuestros pequeños ni reconoce el derecho de nuestros mayores.', src:'Hadiz · Abu Dawud y At-Tirmidi'},
+  {title:'La mano de arriba', text:'La mano de arriba es mejor que la mano de abajo.', src:'Hadiz · Al-Bujari y Muslim'},
+  {title:'Buscar el conocimiento', text:'Buscar el conocimiento es una obligación para todo musulmán.', src:'Hadiz · Ibn Mayah 224'},
+  {title:'El comerciante honesto', text:'El comerciante veraz y digno de confianza estará con los profetas, los veraces y los mártires.', src:'Hadiz · At-Tirmidi 1209'},
+];
+
+const EVENTS = [
+  {title:'Buena cosecha', text:'La tierra ha dado fruto. Cobra 100.', run:(G,x,p)=>{ gain(G,p,100); x.log(`${p.name} cobra 100 por la buena cosecha.`,'money'); }},
+  {title:'Herencia', text:'Recibes tu parte de una herencia repartida según el Corán. Cobra 150.', run:(G,x,p)=>{ gain(G,p,150); x.log(`${p.name} recibe 150 de herencia.`,'money'); }},
+  {title:'Cartera perdida', text:'Encuentras una cartera y la devuelves intacta (amana). Su dueño insiste en agradecértelo: cobra 50.', run:(G,x,p)=>{ gain(G,p,50); x.log(`${p.name} devuelve una cartera y recibe 50.`,'money'); }},
+  {title:'Avería en tus negocios', text:'Paga 20 por cada fase construida en tus empresas.', run:(G,x,p)=>{ const n=ownedList(G,p.id,'co').reduce((s,pl)=>s+G.level[pl.i],0); if(n){ pay(G,p,'bank',20*n); x.log(`${p.name} paga ${20*n} en reparaciones.`,'pay'); } else x.log(`${p.name} no tiene empresas construidas.`); }},
+  {title:'Salarios atrasados', text:'«Dad al trabajador su salario antes de que se seque su sudor». Paga 15 por cada fase construida en tus empresas, como paga extra a tu plantilla.', run:(G,x,p)=>{ const n=ownedList(G,p.id,'co').reduce((s,pl)=>s+G.level[pl.i],0); if(n){ pay(G,p,'bank',15*n); x.log(`${p.name} paga ${15*n} a sus trabajadores.`,'pay'); } else x.log(`${p.name} no tiene plantilla todavía.`); }},
+  {title:'Zakat al-Fitr', text:'Termina Ramadán. Todos los jugadores pagan 20 al Bayt al-Mal.', run:(G,x,p)=>{ G.players.forEach(q=>pay(G,q,'bm',20)); x.log('Todos pagan 20 de Zakat al-Fitr al Bayt al-Mal.','pay'); }},
+  {title:'Ramadán Karim', text:'La ciudad se vuelca con los que ayunan. Los dueños del Comedor social y del Banco de alimentos ganan 1 quesito cada uno, si ya han construido.', run:(G,x,p)=>{ bonusQ(G,x,'comedor',1); bonusQ(G,x,'banco',1); }},
+  {title:'Ola de frío', text:'El Albergue se llena de gente que busca refugio. Su dueño gana 2 quesitos, si ya ha construido.', run:(G,x,p)=>{ bonusQ(G,x,'albergue',2); }},
+  {title:'Día del Árbol', text:'Los colegios plantan árboles en el jardín botánico. Su dueño gana 1 quesito, si ya ha construido.', run:(G,x,p)=>{ bonusQ(G,x,'jardin',1); }},
+  {title:'Torneo escolar', text:'Los dueños del Polideportivo y del Espacio de ocio para jóvenes ganan 1 quesito cada uno, si ya han construido.', run:(G,x,p)=>{ bonusQ(G,x,'polideportivo',1); bonusQ(G,x,'jovenes',1); }},
+  {title:'Visita a los mayores', text:'Pasas la tarde con los mayores del barrio. El dueño del Espacio para jubilados gana 1 quesito y tú ganas 1 quesito de buenas obras.', run:(G,x,p)=>{ bonusQ(G,x,'jubilados',1); addDeed(G,x,p,'visitar a los mayores'); }},
+  {title:'Voluntariado en la biblioteca', text:'Das clases de apoyo. El dueño de la Biblioteca gana 1 quesito y tú ganas 1 quesito de buenas obras.', run:(G,x,p)=>{ bonusQ(G,x,'biblioteca',1); addDeed(G,x,p,'dar clases de apoyo'); }},
+  {title:'Epidemia de gripe', text:'Todos los jugadores pagan 30 al dueño del Hospital. Si nadie lo ha construido, el dinero va al Bayt al-Mal.', run:(G,x,p)=>{ const k=KEY.hospital, o=G.level[k]>0?G.owner[k]:null; G.players.forEach(q=>{ if(q.id!==o) pay(G,q,o==null?'bm':o,30); }); x.log(`Epidemia: todos pagan 30 ${o==null?'al Bayt al-Mal':'a '+G.players[o].name}.`,'pay'); }},
+  {title:'Móvil de moda', text:'Sale un móvil nuevo. Todos pagan 20 al dueño de Electrónica, si ya ha construido.', run:(G,x,p)=>{ chargeAllTo(G,x,'electronica',20); }},
+  {title:'Obras en la ciudad', text:'Se reforman las calles. Todos pagan 20 al dueño de la Constructora, si ya ha construido.', run:(G,x,p)=>{ chargeAllTo(G,x,'constructora',20); }},
+  {title:'Licencia exprés', text:'El Diwan agiliza los trámites. Puedes construir ahora en uno de tus solares sin tirar el dado de licencias.', run:async(G,x,p)=>{ await buildPhase(G,x,p,PLOTS.map(pl=>pl.i),true); }},
+  {title:'Una puerta nueva', text:'Los vecinos abren un paso nuevo. Coloca gratis una puerta en uno de tus edificios.', run:async(G,x,p)=>{ await freeDoor(G,x,p); }},
+  {title:'Gran nevada', text:'Te quedas en casa. Pierdes el siguiente turno.', run:(G,x,p)=>{ p.skip=1; x.log(`${p.name} pierde el siguiente turno por la nevada.`); }},
+  {title:'Invitación a una boda', text:'Viajas a la boda de un primo. Avanza hasta Bab al-Madina y cobra tu sueldo.', run:async(G,x,p)=>{ await jumpTo(G,x,p,0); }},
+  {title:'Huelga de transporte', text:'Vas a pie. Retrocede 3 casillas y resuelve la casilla donde caigas.', run:async(G,x,p)=>{ await moveBy(G,x,p,-3); await resolveSquare(G,x,p,true); }},
+];
+
+const PROFILES = {
+  prudente:    {label:'IA Prudente',     res:320, pref:'mix', sadaqaMin:650, forgiveMin:700},
+  emprendedora:{label:'IA Emprendedora', res:110, pref:'co',  sadaqaMin:900, forgiveMin:950},
+  generosa:    {label:'IA Generosa',     res:160, pref:'soc', sadaqaMin:320, forgiveMin:360},
+};
+const PLAYER_COLORS = ['#C0392B','#1F7A4D','#D4951A','#6B45A8'];
+const PERMIT_FACES = ['ok','ok','ok','no','x2','free'];
+const DEFAULT_RULES = {startCash:1500, salary:250, rateMul:2.5, doorCost:50, zakat:true, nisab:500, sadaqa:true, sadaqaCost:100, inauguration:true, forgive:true, trayCap:8, deedCap:8, forgiveMinDebt:50};
+
+const totalDebt = p => p.debts.reduce((s,d)=>s+d.amount,0);
+const hasDebt = p => totalDebt(p) > 0;
+const ownedList = (G,pid,t) => PLOTS.filter(pl => G.owner[pl.i]===pid && (!t || pl.t===t));
+const doorsOf = (G,k) => G.door.reduce((a,d,i)=>(d===k?a.concat(i):a),[]);
+const freeSlots = (G,k) => PLOTS[k].slots.filter(i=>G.door[i]==null);
+function score(G,p){ return p.deeds + ownedList(G,p.id,'soc').reduce((s,pl)=>s+G.tray[pl.i],0); }
+function nextOfType(pos,t){ for(let k=1;k<=N;k++){ const j=(pos+k)%N; if(SPECIAL_AT[j]===t) return j; } return pos; }
+function shuffle(a,rng){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const isAI = (x,p) => x.sim || p.kind !== 'human';
+
+function newGame(seats, R, opts, rng=Math.random){
+  const RR = Object.assign({},DEFAULT_RULES,R);
+  applyRates(RR);
+  const P = PLOTS.length;
+  const G = {
+    R:RR, rng,
+    players: seats.map((s,k)=>({id:k, name:s.name, kind:s.kind, color:PLAYER_COLORS[s.seat ?? k], cash:RR.startCash, pos:0, skip:0, debts:[], deeds:0, laps:0})),
+    owner:Array(P).fill(null), level:Array(P).fill(0), tray:Array(P).fill(0), door:Array(N).fill(null),
+    bm:0, cur:0, round:1, turns:0, decks:{rec:[],suc:[]},
+    over:false, overtime:null, otBase:0, otTurns:0, winner:null, shared:false,
+    mode:opts.mode, maxRounds:opts.maxRounds||0, target:opts.target||0, totalMs:opts.totalMs||0, timeLeft:opts.totalMs||0, lastRound:false,
+    stats:{buyRound:{}, rent:Array(P).fill(0), zakat:0, sadaqa:0, forgive:0, debtEver:new Set(), bmAid:0, permits:{ok:0,no:0,x2:0,free:0}},
+  };
+  return G;
+}
+function draw(G,deck){
+  const src = deck==='rec'?REMINDERS:EVENTS;
+  if(!G.decks[deck].length) G.decks[deck] = shuffle([...src.keys()], G.rng);
+  return src[G.decks[deck].pop()];
+}
+
+/* ---- dinero sin riba ---- */
+function addDebt(G,p,to,amt){ const d=p.debts.find(d=>d.to===to); if(d) d.amount+=amt; else p.debts.push({to,amount:amt}); G.stats.debtEver.add(p.id); }
+function credit(G,to,amt){ if(amt<=0||to==='bank') return; if(to==='bm'){ G.bm+=amt; return; } gain(G,G.players[to],amt); }
+function gain(G,p,amt){ p.cash+=amt; settle(G,p); }
+function settle(G,p){
+  for(const d of [...p.debts]){ if(p.cash<=0) break; const x=Math.min(p.cash,d.amount); if(x<=0) continue; p.cash-=x; d.amount-=x; credit(G,d.to,x); }
+  p.debts = p.debts.filter(d=>d.amount>0);
+}
+function pay(G,p,to,amt){ const paid=Math.min(p.cash,amt); p.cash-=paid; credit(G,to,paid); const rest=amt-paid; if(rest>0) addDebt(G,p,to,rest); return rest; }
+function forgiveDebt(G,x,cr,db){
+  const d = db.debts.find(d=>d.to===cr.id); if(!d) return;
+  db.debts = db.debts.filter(e=>e!==d); G.stats.forgive++;
+  x.log(`${cr.name} condona a ${db.name} una deuda de ${d.amount}.`,'q');
+  if(d.amount >= G.R.forgiveMinDebt) addDeed(G,x,cr,'condonar una deuda');
+}
+function sellValue(G,k){ const pl=PLOTS[k]; let v=pl.land; for(let s=0;s<G.level[k];s++) v+=pl.cost[s]; return Math.floor(v/2/5)*5; }
+function sellCompany(G,x,p,k){
+  const pl=PLOTS[k]; if(G.owner[k]!==p.id || pl.t!=='co') return;
+  const v = sellValue(G,k);
+  G.owner[k]=null; G.level[k]=0; G.door.forEach((d,i)=>{ if(d===k) G.door[i]=null; });
+  x.log(`${p.name} vende ${pl.short} al banco por ${v}. Sus edificios y puertas se retiran.`,'money');
+  gain(G,p,v);
+}
+function addDeed(G,x,p,why){ if(p.deeds>=G.R.deedCap){ x.log(`${p.name} ya tiene llena su bandeja de buenas obras.`); return false; } p.deeds++; x.log(`${p.name} gana 1 quesito de buenas obras por ${why}.`,'q'); return true; }
+function addQ(G,x,k,n,why){
+  const o=G.owner[k]; if(o==null) return 0;
+  const add=Math.max(0,Math.min(G.R.trayCap-G.tray[k],n)); G.tray[k]+=add;
+  if(add) x.log(`${G.players[o].name} gana ${add} quesito${add>1?'s':''} en ${PLOTS[k].short}${why?' ('+why+')':''}.`,'q');
+  else x.log(`La bandeja de ${PLOTS[k].short} está completa.`);
+  return add;
+}
+function bonusQ(G,x,key,n){ const k=KEY[key]; if(G.owner[k]==null||!G.level[k]){ x.log(`${PLOTS[k].short} aún no funciona: nadie gana quesitos.`); return; } addQ(G,x,k,n); }
+function chargeAllTo(G,x,key,amt){
+  const k=KEY[key], o=G.level[k]>0?G.owner[k]:null;
+  if(o==null){ x.log(`${PLOTS[k].short} aún no funciona: no pasa nada.`); return; }
+  G.players.forEach(q=>{ if(q.id!==o) pay(G,q,o,amt); }); x.log(`Todos pagan ${amt} a ${G.players[o].name}.`,'pay');
+}
+
+/* ---- IA ---- */
+function prefScore(G,p,pl,prog){
+  const P=PROFILES[p.kind]||PROFILES.prudente;
+  let s = freeSlots(G,pl.i).length*12 + doorsOf(G,pl.i).length*25 + G.level[pl.i]*15;
+  if(P.pref==='co') s += pl.t==='co' ? (prog<0.5?45:-10) : 10;
+  if(P.pref==='soc') s += pl.t==='soc' ? 45 : (prog<0.3?15:-10);
+  if(P.pref==='mix') s += pl.t==='co' ? (prog<0.4?30:-10) : 20;
+  if(pl.t==='co' && prog>0.7) s -= 200;
+  return s;
+}
+const stageSum = (pl,from,n) => pl.cost.slice(from,from+n).reduce((a,b)=>a+b,0);
+function aiDecide(G,x,p,kind,d){
+  const P=PROFILES[p.kind]||PROFILES.prudente, prog=x.progress(G);
+  const res = P.res*(1-0.6*prog);
+  if(kind==='land'){
+    const c = d.plots.map(k=>PLOTS[k]).filter(pl=>{
+      const need = pl.land + (prog>0.5 ? pl.cost[0] : 0);
+      return p.cash-need >= res && prefScore(G,p,pl,prog)>0;
+    }).sort((a,b)=>prefScore(G,p,b,prog)-prefScore(G,p,a,prog));
+    return c.length ? c[0].i : null;
+  }
+  if(kind==='build'){
+    let best=null;
+    for(const k of d.plots){
+      const pl=PLOTS[k], lv=G.level[k];
+      if(pl.t==='co' && prog>0.8) continue;
+      const doorReserve = doorsOf(G,k).length ? 0 : G.R.doorCost;
+      let n=0; while(n<3-lv && stageSum(pl,lv,n+1) <= p.cash - res - doorReserve) n++;
+      if(!n) continue;
+      const sc = prefScore(G,p,pl,prog) + n*10;
+      if(!best || sc>best.sc) best={plot:k, stages:n, sc};
+    }
+    return best ? {plot:best.plot, stages:best.stages} : null;
+  }
+  if(kind==='double') return d.total <= p.cash - res*0.5;
+  if(kind==='doors'){
+    const picks=[]; let budget = d.cost ? Math.floor((p.cash - res*0.4)/d.cost) : d.max;
+    const plots = d.plots.slice().sort((a,b)=>prefScore(G,p,PLOTS[b],prog)-prefScore(G,p,PLOTS[a],prog));
+    const used = new Set();
+    for(const k of plots){
+      const have = doorsOf(G,k).length;
+      let want = Math.max(0, (have?1:2));
+      if(!have && budget<1 && d.cost && p.cash>=d.cost) budget=1;
+      for(const i of freeSlots(G,k)){
+        if(want<=0 || budget<=0 || picks.length>=d.max) break;
+        if(used.has(i)) continue;
+        picks.push({sq:i, plot:k}); used.add(i); want--; budget--;
+      }
+    }
+    return picks;
+  }
+  if(kind==='donate') return p.cash - d.cost >= P.sadaqaMin*(1-prog*0.5);
+  if(kind==='forgive'){ const b=d.debtors.slice().sort((a,b)=>b.amount-a.amount)[0]; return (b && p.cash>=P.forgiveMin*0.6) ? b.id : null; }
+  return false;
+}
+function aiHousekeeping(G,x,p){
+  const P=PROFILES[p.kind]||PROFILES.prudente, prog=x.progress(G);
+  if(G.R.forgive && p.deeds<G.R.deedCap){
+    for(const q of G.players){ const d=q.debts.find(d=>d.to===p.id);
+      if(d && d.amount>=G.R.forgiveMinDebt && p.cash>=P.forgiveMin*(1-0.4*prog)){ forgiveDebt(G,x,p,q); break; } }
+  }
+  if(hasDebt(p)){
+    const cos = ownedList(G,p.id,'co').sort((a,b)=>sellValue(G,a.i)-sellValue(G,b.i));
+    for(const pl of cos){ if(!hasDebt(p)) break; if(totalDebt(p)>=100 || prog>0.6) sellCompany(G,x,p,pl.i); }
+  }
+}
+async function decide(G,x,p,kind,d){ return isAI(x,p) ? aiDecide(G,x,p,kind,d) : x.decide(p,kind,d); }
+
+/* ---- movimiento ---- */
+async function passStart(G,x,p){
+  p.laps++; gain(G,p,G.R.salary);
+  x.log(`${p.name} cruza Bab al-Madina y cobra ${G.R.salary} de sueldo.`,'money');
+  if(G.R.zakat){
+    const net=p.cash-totalDebt(p);
+    if(net>=G.R.nisab){ const z=Math.ceil(net*0.025/5)*5; p.cash-=z; G.bm+=z; G.stats.zakat+=z; x.log(`${p.name} paga ${z} de zakat (2,5 %) al Bayt al-Mal.`,'pay'); }
+  }
+}
+async function moveBy(G,x,p,n){
+  const dir=n>=0?1:-1;
+  for(let k=0;k<Math.abs(n);k++){ p.pos=(p.pos+dir+N)%N; await x.step(p); if(dir>0&&p.pos===0) await passStart(G,x,p); }
+}
+async function jumpTo(G,x,p,t){ const passes = t<=p.pos; p.pos=t; await x.step(p,true); if(passes) await passStart(G,x,p); }
+
+/* ---- solares, construcción, puertas ---- */
+async function buyLand(G,x,p,near){
+  const free = near.filter(k=>G.owner[k]==null);
+  if(!free.length) return;
+  if(hasDebt(p)){ x.log(`${p.name} no puede comprar solares: primero debe saldar sus deudas.`); return; }
+  const aff = free.filter(k=>p.cash>=PLOTS[k].land);
+  if(!aff.length){ x.log(`${p.name} no tiene dinero para ${free.map(k=>PLOTS[k].short).join(' ni ')}.`); return; }
+  const k = await decide(G,x,p,'land',{plots:aff});
+  if(k==null){ x.log(`${p.name} decide no comprar solar.`); return; }
+  const pl=PLOTS[k]; p.cash-=pl.land; G.owner[k]=p.id; G.stats.buyRound[k]=G.round;
+  x.log(`${p.name} compra el solar de ${pl.short} por ${pl.land}. Coloca su banderín.`,'pay');
+  await x.changed();
+}
+async function buildPhase(G,x,p,near,noPermit){
+  if(hasDebt(p)) return;
+  const cand = near.filter(k=>G.owner[k]===p.id && G.level[k]<3 && p.cash>=PLOTS[k].cost[G.level[k]]);
+  if(!cand.length) return;
+  const plan = await decide(G,x,p,'build',{plots:cand, noPermit});
+  if(!plan || !plan.stages) return;
+  const k=plan.plot, pl=PLOTS[k], lv=G.level[k];
+  let costs = pl.cost.slice(lv, lv+plan.stages);
+  let face='ok';
+  if(!noPermit){ face = await x.permitRoll(p,k); G.stats.permits[face]++; }
+  if(face==='no'){ x.log(`El Diwan deniega la licencia a ${p.name} para ${pl.short}.`,'pay'); return; }
+  if(face==='free'){ costs[0]=0; x.log(`Un benefactor dona como waqf la primera fase de ${pl.short}.`,'q'); }
+  if(face==='x2') costs = costs.map(c=>c*2);
+  while(costs.length && costs.reduce((a,b)=>a+b,0)>p.cash) costs.pop();
+  if(!costs.length){ x.log(`${p.name} no puede pagar la construcción.`); return; }
+  const total = costs.reduce((a,b)=>a+b,0);
+  if(face==='x2'){
+    const ok = await decide(G,x,p,'double',{plot:k,total,stages:costs.length});
+    if(!ok){ x.log(`${p.name} renuncia a construir: el Diwan pedía el doble.`); return; }
+  }
+  p.cash-=total; G.level[k]+=costs.length;
+  x.log(`${p.name} construye ${pl.stages.slice(lv,lv+costs.length).join(' + ')} en ${pl.short} (${total}).`,'pay');
+  if(pl.t==='soc' && G.R.inauguration) addQ(G,x,k,costs.length,'inauguración');
+  await x.changed(k);
+  if(!doorsOf(G,k).length) await doorPhase(G,x,p,[k]);
+}
+async function doorPhase(G,x,p,near,free){
+  if(!free && hasDebt(p)) return;
+  const plots = near.filter(k=>G.owner[k]===p.id && G.level[k]>0 && freeSlots(G,k).length);
+  if(!plots.length) return;
+  const cost = free?0:G.R.doorCost;
+  const max = free ? 1 : Math.min(6, Math.floor(p.cash/cost));
+  if(max<1) return;
+  const picks = await decide(G,x,p,'doors',{plots, cost, max});
+  if(!picks || !picks.length) return;
+  let n=0;
+  for(const {sq,plot} of picks.slice(0,max)){
+    if(G.door[sq]!=null || !PLOTS[plot].slots.includes(sq) || p.cash<cost) continue;
+    p.cash-=cost; G.door[sq]=plot; n++;
+  }
+  if(n) x.log(`${p.name} abre ${n} puerta${n>1?'s':''}${free?' gratis':` (${n*cost})`} para ${[...new Set(picks.map(q=>PLOTS[q.plot].short))].join(', ')}.`,'pay');
+  await x.changed();
+}
+async function freeDoor(G,x,p){
+  const plots = ownedList(G,p.id).filter(pl=>G.level[pl.i]>0 && freeSlots(G,pl.i).length).map(pl=>pl.i);
+  if(!plots.length){ x.log(`${p.name} no tiene edificios con sitio para una puerta.`); return; }
+  await doorPhase(G,x,p,plots,true);
+}
+async function plotActions(G,x,p,near){
+  await buyLand(G,x,p,near);
+  await buildPhase(G,x,p,near);
+  await doorPhase(G,x,p,near);
+}
+
+/* ---- resolver casilla ---- */
+async function resolveSquare(G,x,p,noTransport){
+  const i=p.pos, sp=SPECIAL_AT[i];
+  if(sp){
+    switch(sp){
+      case 'start': x.log(`${p.name} descansa en Bab al-Madina.`); break;
+      case 'diwan': x.log(`${p.name} llega al Diwan: puede construir y abrir puertas en cualquiera de sus solares.`);
+        await buildPhase(G,x,p,PLOTS.map(pl=>pl.i)); await doorPhase(G,x,p,PLOTS.map(pl=>pl.i)); break;
+      case 'freedoor': await freeDoor(G,x,p); break;
+      case 'wait': p.skip=1; x.log(`${p.name} cae en Contratiempo y pierde el próximo turno.`); break;
+      case 'plane': case 'train': {
+        if(noTransport){ x.log(`${p.name} se detiene en la ${sp==='plane'?'terminal':'estación'}.`); break; }
+        const t=nextOfType(i,sp); x.log(`${p.name} viaja en ${sp==='plane'?'avión':'tren'}.`); await x.wait(300); await jumpTo(G,x,p,t); break; }
+      case 'rec': {
+        const c=draw(G,'rec'); let choices=null, cd=null;
+        if(c.offer?.type==='donate' && G.R.sadaqa && !hasDebt(p) && p.cash>=c.offer.cost && p.deeds<G.R.deedCap){
+          choices=[{label:`Donar ${c.offer.cost} · +1 quesito`,value:true,primary:true},{label:'Ahora no',value:false}]; cd={kind:'donate',cost:c.offer.cost}; }
+        if(c.offer?.type==='forgive' && G.R.forgive){
+          const debtors=G.players.map(q=>{ const d=q.debts.find(d=>d.to===p.id); return d?{id:q.id,name:q.name,amount:d.amount}:null; }).filter(Boolean);
+          if(debtors.length){ choices=debtors.map(d=>({label:`Condonar a ${d.name} (${d.amount})`,value:d.id})).concat([{label:'Ahora no',value:null}]); cd={kind:'forgive',debtors}; } }
+        const aiv = isAI(x,p)&&cd ? aiDecide(G,x,p,cd.kind,cd) : null;
+        const v = await x.showCard(p,c,'rec',isAI(x,p)?null:choices);
+        const r = isAI(x,p)?aiv:v;
+        x.log(`${p.name} lee un Recordatorio: «${c.title}».`);
+        if(cd?.kind==='donate' && r){ p.cash-=c.offer.cost; G.bm+=c.offer.cost; G.stats.sadaqa++; addDeed(G,x,p,`donar ${c.offer.cost}`); }
+        if(cd?.kind==='forgive' && r!=null && r!==false) forgiveDebt(G,x,p,G.players[r]);
+        break; }
+      case 'suc': { const c=draw(G,'suc'); await x.showCard(p,c,'suc',null); x.log(`Suceso para ${p.name}: «${c.title}».`); await c.run(G,x,p); break; }
+      case 'sadaqa': {
+        const c=G.R.sadaqaCost;
+        if(!G.R.sadaqa){ x.log(`${p.name} pasa por la casilla de Sadaqa.`); break; }
+        if(hasDebt(p)){ x.log(`${p.name} tiene deudas: pagar lo que se debe va antes que la caridad voluntaria.`); break; }
+        if(p.cash<c || p.deeds>=G.R.deedCap){ x.log(`${p.name} no puede dar sadaqa ahora.`); break; }
+        if(await decide(G,x,p,'donate',{cost:c,space:true})){ p.cash-=c; G.bm+=c; G.stats.sadaqa++; addDeed(G,x,p,`dar ${c} de sadaqa`); }
+        else x.log(`${p.name} decide no dar sadaqa esta vez.`);
+        break; }
+      case 'bm': {
+        const debt=totalDebt(p);
+        if(debt>0 && G.bm>0){ const a=Math.min(debt,G.bm); G.bm-=a; G.stats.bmAid+=a; x.log(`El Bayt al-Mal paga ${a} de las deudas de ${p.name} (Corán 9:60).`,'money'); gain(G,p,a); }
+        else if(p.cash<150 && G.bm>0){ const a=Math.min(100,G.bm); G.bm-=a; G.stats.bmAid+=a; x.log(`${p.name} pasa necesidad y el Bayt al-Mal le entrega ${a}.`,'money'); gain(G,p,a); }
+        else x.log(`${p.name} visita el Bayt al-Mal. No necesita ayuda.`);
+        break; }
+    }
+    return;
+  }
+  const k = G.door[i];
+  if(k!=null && G.owner[k]!==p.id){
+    const pl=PLOTS[k], o=G.owner[k], lv=G.level[k];
+    if(pl.t==='co'){
+      const die = await x.rollStay(p,k);
+      const amt = die*pl.rate[lv-1];
+      const rest = pay(G,p,o,amt); G.stats.rent[k]+=amt;
+      x.log(`${p.name} entra en ${pl.short} de ${G.players[o].name}: dado ${die} × ${pl.rate[lv-1]} = ${amt}.${rest?` Queda debiendo ${rest}, sin intereses.`:''}`,'pay');
+    } else {
+      addQ(G,x,k,lv,`${p.name} usa sus servicios`);
+    }
+    await x.changed();
+  }
+  await plotActions(G,x,p,ADJ[i]);
+}
+async function playTurn(G,x){
+  const p=G.players[G.cur]; G.turns++; x.update();
+  if(isAI(x,p)) aiHousekeeping(G,x,p);
+  if(p.skip>0){ p.skip--; x.log(`${p.name} pierde este turno.`); await x.wait(700); return; }
+  const [a,b]=await x.rollDice(p);
+  x.log(`${p.name} saca ${a} + ${b} = ${a+b}.`);
+  await moveBy(G,x,p,a+b);
+  await resolveSquare(G,x,p);
+  x.update();
+}
+function ranking(G){ return G.players.map(p=>({p,s:score(G,p)})).sort((a,b)=>b.s-a.s||b.p.cash-a.p.cash); }
+function finish(G,x,w,shared){ G.over=true; G.winner=w; G.shared=!!shared; x.log(shared?'La partida termina en empate compartido.':`¡${G.players[w].name} gana la partida!`,'q'); }
+function startOvertime(G,x,tied,top){
+  G.overtime=tied.sort((a,b)=>a-b); G.otBase=top; G.otTurns=0;
+  x.log(`¡Empate a ${top} entre ${tied.map(i=>G.players[i].name).join(' y ')}! Prórroga: gana quien consiga el siguiente quesito.`,'q');
+  G.cur=G.overtime[0];
+}
+function advance(G,x){
+  const n=G.players.length;
+  if(G.overtime){
+    const sc=G.overtime.map(id=>score(G,G.players[id])); const max=Math.max(...sc);
+    if(max>G.otBase){ const l=G.overtime.filter((id,k)=>sc[k]===max); if(l.length===1){ finish(G,x,l[0]); return; } G.overtime=l; G.otBase=max; }
+    if(++G.otTurns>400){ finish(G,x,G.overtime[0],true); return; }
+    let c=G.cur; do{ c=(c+1)%n; }while(!G.overtime.includes(c)); G.cur=c; return;
+  }
+  if(G.mode==='target'){
+    const rk=ranking(G), top=rk[0].s;
+    if(top>=G.target){ const tied=rk.filter(r=>r.s===top).map(r=>r.p.id); if(tied.length===1){ finish(G,x,tied[0]); return; } startOvertime(G,x,tied,top); return; }
+  }
+  const next=(G.cur+1)%n;
+  if(next===0){
+    G.round++;
+    if(x.timeUp(G)){
+      const rk=ranking(G), top=rk[0].s, tied=rk.filter(r=>r.s===top).map(r=>r.p.id);
+      if(tied.length===1){ finish(G,x,tied[0]); return; }
+      startOvertime(G,x,tied,top); return;
+    }
+  }
+  G.cur=next;
+}
+async function runGame(G,x){ while(!G.over){ const p=G.players[G.cur]; await playTurn(G,x); await x.endTurn(p); advance(G,x); } }
+
+/* ====================== ICONOS ====================== */
+const ICONS = {
+  mosque:'<path d="M12 5.5c-3 1.8-5 3.8-5 6.5h10c0-2.7-2-4.7-5-6.5z"/><path d="M12 3v2.5"/><path d="M4 21V9.5l.75-2 .75 2V21M19.5 21V9.5l.75-2 .75 2V21"/><path d="M7 12v9h10v-9"/><path d="M10.5 21v-4a1.5 1.5 0 013 0v4"/><path d="M2.5 21h19"/>',
+  uni:'<path d="M3.5 10h17M5 10l7-5.5 7 5.5"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M3 20.5h18M4.5 18h15"/>',
+  orphan:'<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M12 17.5s-3.2-1.9-3.2-3.8a1.7 1.7 0 013.2-.9 1.7 1.7 0 013.2.9c0 1.9-3.2 3.8-3.2 3.8z"/>',
+  shelter:'<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M7 19v-4.5h10V19M7 17h10"/><path d="M8.5 14.5v-1.8h2.6v1.8"/>',
+  bowl:'<path d="M3.5 12h17a8.5 8.5 0 01-17 0z"/><path d="M9 9c0-1.2 1.2-1.2 1.2-2.4S9 5.4 9 4.2M13.5 9c0-1.2 1.2-1.2 1.2-2.4s-1.2-1.2-1.2-2.4"/><path d="M8 21h8"/>',
+  crate:'<path d="M3.5 9h17v11h-17z"/><path d="M3.5 9l2-4h13l2 4"/><path d="M12 13.2c-1.6-1-3.4 0-3.4 1.7S10.3 18.8 12 17.8c1.7 1 3.4-1.2 3.4-2.9s-1.8-2.7-3.4-1.7z"/>',
+  paw:'<circle cx="6.5" cy="10.5" r="1.7"/><circle cx="10" cy="6.8" r="1.7"/><circle cx="14.5" cy="6.8" r="1.7"/><circle cx="18" cy="10.5" r="1.7"/><path d="M12.2 11.5c-3.2 0-5.4 4.2-4.3 6.4.8 1.5 2.7 1.1 4.3 1.1s3.5.4 4.3-1.1c1.1-2.2-1.1-6.4-4.3-6.4z"/>',
+  pad:'<rect x="2.5" y="7.5" width="19" height="10" rx="5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r=".9"/><circle cx="17.8" cy="13.8" r=".9"/>',
+  tree:'<path d="M12 21v-7"/><path d="M12 15c-4.2 0-6.5-2.3-6.5-5.3a6.5 6.5 0 0113 0c0 3-2.3 5.3-6.5 5.3z"/><path d="M5 21h14"/>',
+  elder:'<circle cx="10" cy="4.8" r="2"/><path d="M10 7c-1.2 3-1.2 5.2 0 7.2L8 20.5M10 14.2l3 6.3M9.6 9.5l4.2 1.6"/><path d="M14.5 11v9.5M14.5 11c0-1.4 2-1.4 2 0"/>',
+  kite:'<path d="M12 2.5l6.5 6.5-6.5 6.5L5.5 9z"/><path d="M5.5 9h13M12 2.5v13"/><path d="M12 15.5c0 2-2.2 2-2.2 3.8S12 21.5 12 21.5"/>',
+  books:'<path d="M4 4h3.2v16H4zM8.2 4h3.2v16H8.2z"/><path d="M13.2 5.6l3-.8 4.2 15.4-3 .8z"/><path d="M3 20.5h18"/>',
+  ball:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6c3.1 3.3 3.1 8.7 0 12M18 6c-3.1 3.3-3.1 8.7 0 12"/>',
+  crescent:'<rect x="3" y="3" width="18" height="18" rx="3.5"/><path d="M15 7.2a5.2 5.2 0 100 9.6 4.3 4.3 0 010-9.6z"/>',
+  dish:'<path d="M4.5 13.5a7.5 7.5 0 0010.6 0L4.5 2.9a7.5 7.5 0 000 10.6z"/><path d="M9.8 8.2l4.5-4.5"/><circle cx="15" cy="3" r="1"/><path d="M8.5 16l-2 5h8l-2-5"/>',
+  crane:'<path d="M6 21V4M6 4h14.5M6 7.5L9.5 4M20 4v5.5"/><path d="M18.5 9.5h3v2.5h-3z"/><path d="M2.5 21h9"/><path d="M6 11l3.5-3.5M6 15l3.5-3.5"/>',
+  washer:'<rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M4.5 7h15"/><circle cx="12" cy="14" r="4.3"/><circle cx="7.5" cy="4.8" r=".7"/>',
+  devices:'<rect x="2.5" y="5" width="12.5" height="9" rx="1"/><path d="M1 17h15.5"/><rect x="16.5" y="8" width="6" height="12" rx="1.3"/>',
+  key:'<path d="M2.5 11l7.5-6.5 7.5 6.5"/><path d="M4.5 9.5V20h5"/><circle cx="14.5" cy="16" r="2.7"/><path d="M17.2 16H22M20.2 16v2.3"/>',
+  basket:'<path d="M3.5 9.5h17l-2 10H5.5z"/><path d="M8 9.5l3.3-5.5M16 9.5l-3.3-5.5"/><path d="M9 12.5v4.5M12 12.5v4.5M15 12.5v4.5"/>',
+  shirt:'<path d="M8.5 3L3 6.2l2.2 4.2 2.1-1V21h9.4V9.4l2.1 1L21 6.2 15.5 3a3.5 3.5 0 01-7 0z"/>',
+  truck:'<path d="M1.5 5.5h12v10.5h-12zM13.5 9h4.2l4.3 4.3V16h-8.5z"/><circle cx="5.5" cy="17.5" r="1.9"/><circle cx="17.5" cy="17.5" r="1.9"/>',
+  parcel:'<path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5L12 12l9-4.5M12 12v9M7.5 5.2l9 4.6"/>',
+  car:'<path d="M2.5 16.5v-3.2l2.2-5.3h14.6l2.2 5.3v3.2z"/><path d="M4.5 13.3h15"/><circle cx="7.3" cy="16.8" r="1.9"/><circle cx="16.7" cy="16.8" r="1.9"/>',
+  plane:'<path d="M21 15.5v-2l-8-5V3.8a1.5 1.5 0 00-3 0V8.5l-8 5v2l8-2.5v5l-2 1.5v1.8l3.5-1 3.5 1v-1.8L13 18v-5z"/>',
+  train:'<rect x="5" y="2.5" width="14" height="14.5" rx="3"/><path d="M5 10h14"/><circle cx="8.6" cy="13.5" r="1"/><circle cx="15.4" cy="13.5" r="1"/><path d="M8 17l-2.2 4.5M16 17l2.2 4.5"/>',
+  book:'<path d="M12 6.2C10 4.7 7 4.2 3.5 4.7V19c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V4.7C17 4.2 14 4.7 12 6.2z"/><path d="M12 6.2v14.3"/>',
+  bolt:'<path d="M13.5 2L4.5 14h7l-1 8 9-12h-7z"/>',
+  hourglass:'<path d="M6 3h12M6 21h12M7 3c0 5.2 5 6.2 5 9s-5 3.8-5 9M17 3c0 5.2-5 6.2-5 9s5 3.8 5 9"/>',
+  gate:'<path d="M3 21V9l9-6 9 6v12"/><path d="M8 21v-6a4 4 0 018 0v6"/><path d="M3 21h18"/>',
+  seal:'<path d="M12 2.5l2.3 3 3.7-.6.6 3.7 3 2.3-3 2.3-.6 3.7-3.7-.6-2.3 3-2.3-3-3.7.6-.6-3.7-3-2.3 3-2.3.6-3.7 3.7.6z"/><path d="M9 12l2 2 4-4"/>',
+  arch:'<path d="M5 21V11a7 7 0 0114 0v10"/><path d="M9 21v-8a3 3 0 016 0v8"/><path d="M3 21h18"/>',
+  treasury:'<path d="M3 20.5h18M5 20.5v-8.5M19 20.5v-8.5M2.5 12h19L12 4.5z"/><circle cx="12" cy="16" r="2.6"/>',
+  hand:'<path d="M3 14.5h3l4 2h4.5a1.5 1.5 0 000-3H11"/><path d="M6 14v6H2.5v-6"/><path d="M14 13.8l5-2.5a1.5 1.5 0 012 2.2l-6.5 4.5"/><circle cx="15" cy="6" r="3"/>',
+};
+const icon = (k,cls='',size) => `<svg class="${cls}" ${size?`width="${size}" height="${size}"`:''} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]||''}</svg>`;
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = s => document.querySelector(s);
+
+function star8(cx,cy,r,ri=0.7654){ const pts=[]; for(let k=0;k<16;k++){ const a=Math.PI/8*k-Math.PI/2; const rr=k%2?r*ri:r; pts.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1)); } return pts.join(' '); }
+function mix(hex,base,t){ const h=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)); const a=h(hex),b=h(base); return '#'+a.map((v,i)=>Math.round(v*t+b[i]*(1-t)).toString(16).padStart(2,'0')).join(''); }
+
+/* ====================== FIGURAS (maquetas) ====================== */
+const WALL='#F6ECD6', EDGE='#5B4330', DARK='#3A2718';
+function merlons(x,y,w,col){ let s=`<rect x="${x-1}" y="${y-4}" width="${w+2}" height="4.5" fill="${col}" stroke="${EDGE}" stroke-width=".8"/>`; for(let t=x;t<=x+w-3;t+=6.5) s+=`<rect x="${t}" y="${y-8}" width="3.6" height="4" fill="${col}" stroke="${EDGE}" stroke-width=".6"/>`; return s; }
+function archWin(cx,y,sc=1){ return `<path d="M${cx-2.6*sc} ${y+7*sc} V${y+2.5*sc} A3 3 0 1 1 ${cx+2.6*sc} ${y+2.5*sc} V${y+7*sc} Z" fill="${DARK}"/>`; }
+function figure(lv,t,col,key){
+  let s=`<ellipse cx="50" cy="77.5" rx="47" ry="3.2" fill="rgba(40,24,10,.25)"/>`;
+  if(lv>=2){
+    for(const x0 of [4,70]){ s+=`<rect x="${x0}" y="47" width="26" height="30.5" fill="${WALL}" stroke="${EDGE}" stroke-width="1.1"/>${merlons(x0,47,26,col)}${archWin(x0+13,55)}<path d="M${x0+9.5} 77.5 V70 A3.5 3.5 0 1 1 ${x0+16.5} 70 V77.5 Z" fill="${DARK}"/>`; }
+  }
+  if(lv>=3 && t==='soc' && key==='mezquita') s+=`<rect x="84" y="14" width="9" height="33" fill="${WALL}" stroke="${EDGE}" stroke-width="1"/><rect x="82.5" y="24" width="12" height="2.5" fill="${col}"/><path d="M84 14 Q88.5 4 93 14 Z" fill="#C9A227" stroke="${EDGE}" stroke-width=".8"/><path d="M88.5 5 V1.5" stroke="${EDGE}" stroke-width=".8"/>`;
+  if(lv>=1){
+    s+=`<rect x="28" y="30" width="44" height="47.5" fill="${WALL}" stroke="${EDGE}" stroke-width="1.2"/>${merlons(28,30,44,col)}`;
+    s+=archWin(38,39)+archWin(62,39);
+    s+=`<path d="M42.3 65 A9 9 0 1 1 57.7 65" fill="none" stroke="${WALL}" stroke-width="3.2"/><path d="M42.3 65 A9 9 0 1 1 57.7 65" fill="none" stroke="#A8452A" stroke-width="3.2" stroke-dasharray="2.6 2.6"/>`;
+    s+=`<path d="M44.2 77.5 V64.5 A6.6 6.6 0 1 1 55.8 64.5 V77.5 Z" fill="${DARK}"/>`;
+  }
+  if(lv>=3){
+    if(t==='soc'){
+      s+=`<path d="M33 22 C33 8 44 3 50 1.5 C56 3 67 8 67 22 Z" fill="#C9A227" stroke="${EDGE}" stroke-width="1"/><path d="M40 22 C40 12 46 7 50 5.5" fill="none" stroke="#F3D98A" stroke-width="1.4"/>`;
+      if(key==='universidad') s+=`<path d="M50 3 L55 21" stroke="${DARK}" stroke-width="2.2"/>`;
+      else s+=`<path d="M50 1.5 V-3" stroke="${EDGE}" stroke-width="1"/><path d="M48 -3.5 a2.4 2.4 0 1 0 4 0 a1.9 1.9 0 1 1 -4 0" fill="#C9A227"/>`;
+    } else {
+      s+=`<rect x="40" y="4" width="20" height="22" fill="${WALL}" stroke="${EDGE}" stroke-width="1.1"/>${merlons(40,4,20,col)}${archWin(50,10)}<path d="M58 -4 V-18" stroke="${EDGE}" stroke-width="1.1"/><path d="M58 -18 L70 -14 L58 -10 Z" fill="${col}" stroke="${EDGE}" stroke-width=".6"/>`;
+    }
+  }
+  return s;
+}
+const figSVG = (lv,t,col,key,w=100) => `<svg viewBox="0 -22 100 102" width="${w}" aria-hidden="true">${figure(lv,t,col,key)}</svg>`;
+function flagSVG(col){ return `<path d="M0 0 V-34" stroke="${EDGE}" stroke-width="1.6"/><path d="M0 -34 L18 -28 L0 -22 Z" fill="${col}" stroke="${EDGE}" stroke-width=".8"/><ellipse cx="0" cy="0" rx="6" ry="2" fill="rgba(40,24,10,.25)"/>`; }
+const PERMIT_ICON = {
+  ok:'<circle cx="12" cy="12" r="9" fill="#1E6B52"/><path d="M7.5 12.3l3 3 6-6.3" stroke="#FBF7EE" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  no:'<circle cx="12" cy="12" r="9" fill="#A8452A"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#FBF7EE" stroke-width="2.4" stroke-linecap="round"/>',
+  x2:'<rect x="3" y="3" width="18" height="18" rx="4" fill="#B8891A"/><text x="12" y="16.3" text-anchor="middle" font-size="11" font-weight="800" fill="#241807" font-family="Alegreya Sans,sans-serif">×2</text>',
+  free:`<polygon points="${star8(12,12,10)}" fill="#23508E"/><circle cx="12" cy="12" r="3.4" fill="#E9D59A"/>`,
+};
+const PERMIT_TEXT = {ok:['Aprobada','Construyes pagando el precio normal.'], no:['Denegada','Este turno no puedes construir aquí.'], x2:['Doble','El Diwan exige el doble. Puedes pagar o renunciar.'], free:['Waqf','Un benefactor paga la primera fase. El resto, a precio normal.']};
+const permitSVG = (f,s=24) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true">${PERMIT_ICON[f]}</svg>`;
+
+/* ====================== TABLERO 3D ====================== */
+const U=60, M=40, BW=GW*U, BH=GH*U, TW=(BW+2*M)/U, TH=(BH+2*M)/U;
+const SP_FILL = {start:'#E8C0A6', diwan:'#E8C0A6', bm:'#E8C0A6', wait:'#E3B3A1', rec:'#EEDB94', suc:'#EEDB94', plane:'#C6D3E8', train:'#C6D3E8', sadaqa:'#BFDCCB', freedoor:'#BFDCCB'};
+const SP_INK = {start:'#8A3520', diwan:'#8A3520', bm:'#8A3520', wait:'#8A3520', rec:'#7A5A0E', suc:'#7A5A0E', plane:'#1C3F73', train:'#1C3F73', sadaqa:'#1E6B52', freedoor:'#1E6B52'};
+const CAT_INK = {co:'#23508E', soc:'#1E6B52'};
+const svgIcon = (k,x,y,s,col,sw=1.7) => `<g transform="translate(${x},${y}) scale(${s/24})" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</g>`;
+function wrap(str,max){ const w=str.split(' '); const out=[]; let cur=''; for(const x of w){ if((cur+' '+x).trim().length>max && cur){ out.push(cur); cur=x; } else cur=(cur+' '+x).trim(); } if(cur) out.push(cur); return out; }
+const LABELS={electro:['Electro-','domésticos'],super:['Super-','mercado'],coches:['Conce-','sionario'],polideportivo:['Polide-','portivo'],jardin:['Jardín','botánico'],comedor:['Comedor','social'],banco:['Banco de','alimentos'],telecom:['Telecomuni-','caciones'],jubilados:['Espacio','jubilados'],animales:['Protectora','de animales']};
+
+/* --- textura del tablero: SVG para el dibujo, canvas para los textos --- */
+function boardArtSVG(){
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-M} ${-M} ${BW+2*M} ${BH+2*M}" width="${BW+2*M}" height="${BH+2*M}"><defs>
+    <pattern id="zel" width="36" height="36" patternUnits="userSpaceOnUse"><rect width="36" height="36" fill="#1C3F73"/><polygon points="${star8(18,18,13)}" fill="#E9D59A"/><polygon points="${star8(18,18,7)}" fill="#1E6B52"/>${[[0,0],[36,0],[0,36],[36,36]].map(([a,b])=>`<polygon points="${star8(a,b,6)}" fill="#A8452A"/>`).join('')}</pattern>
+    <pattern id="garden" width="18" height="18" patternUnits="userSpaceOnUse"><rect width="18" height="18" fill="#D8C893"/><ellipse cx="5" cy="5" rx="2.4" ry="1.2" fill="#9CAF77" transform="rotate(-30 5 5)"/><ellipse cx="13" cy="13" rx="2.4" ry="1.2" fill="#9CAF77" transform="rotate(35 13 13)"/></pattern>
+    <pattern id="cobble" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#F2E6C7"/><circle cx="3" cy="3" r="1" fill="#E0CFA3"/><circle cx="9" cy="9" r="1" fill="#E0CFA3"/></pattern>
+    <radialGradient id="water"><stop offset="0" stop-color="#9FD0DA"/><stop offset="1" stop-color="#3F8FA6"/></radialGradient></defs>`;
+  s+=`<rect x="${-M}" y="${-M}" width="${BW+2*M}" height="${BH+2*M}" fill="url(#zel)"/>`;
+  s+=`<rect x="-5" y="-5" width="${BW+10}" height="${BH+10}" rx="6" fill="#C9A227"/><rect x="-2" y="-2" width="${BW+4}" height="${BH+4}" fill="#E4D09E"/>`;
+  for(const y of [-M+5, BH+5]) s+=`<rect x="${BW/2-170}" y="${y}" width="340" height="${M-10}" rx="15" fill="#F4E7C3" stroke="#C9A227" stroke-width="2"/>`;
+  for(const [c,r] of [[0,0],[12,0],[0,10],[12,10]]){ const cx=c*U+U/2, cy=r*U+U/2; s+=`<circle cx="${cx}" cy="${cy}" r="26" fill="#1C3F73"/><polygon points="${star8(cx,cy,23)}" fill="#E9D59A"/><polygon points="${star8(cx,cy,13)}" fill="#A8452A"/><circle cx="${cx}" cy="${cy}" r="5" fill="#E9D59A"/>`; }
+  { const x=5*U, y=7*U, w=3*U, h=2*U, cx=x+w/2, cy=y+h/2;
+    s+=`<rect x="${x+3}" y="${y+3}" width="${w-6}" height="${h-6}" rx="6" fill="#CFE0C0" stroke="#8EA86F" stroke-width="1.5"/><path d="M${x+10} ${cy} H${x+w-10} M${cx} ${y+10} V${y+h-10}" stroke="#4F9DB2" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<polygon points="${star8(cx,cy,34)}" fill="#EFE6D2" stroke="#8B7650" stroke-width="1.4"/><circle cx="${cx}" cy="${cy}" r="24" fill="url(#water)"/>`; }
+  PLOTS.forEach(pl=>{ s+=`<rect x="${pl.x*U+2.5}" y="${pl.y*U+2.5}" width="${pl.w*U-5}" height="${pl.h*U-5}" rx="5" fill="url(#garden)" stroke="${CAT_INK[pl.t]}" stroke-width="1.4" stroke-dasharray="5 3"/>`;
+    const ic=Math.min(pl.w,pl.h)*U*0.38, cx=pl.x*U+pl.w*U/2, cy=pl.y*U+pl.h*U/2-6; s+=`<g opacity=".35">${svgIcon(pl.icon,cx-ic/2,cy-ic/2,ic,CAT_INK[pl.t],1.3)}</g>`; });
+  ROAD.forEach(([c,r],i)=>{ const x=c*U, y=r*U, sp=SPECIAL_AT[i];
+    s+=`<rect x="${x+1.5}" y="${y+1.5}" width="${U-3}" height="${U-3}" rx="4" fill="${sp?SP_FILL[sp]:'url(#cobble)'}" stroke="#B89F6A" stroke-width="1"/>`;
+    if(sp) s+=svgIcon(SPECIAL_INFO[sp].icon,x+U/2-12,y+9,24,SP_INK[sp]); });
+  return s+'</svg>';
+}
+async function makeBoardCanvas(){
+  const S=2048/(BW+2*M), cw=2048, ch=Math.round((BH+2*M)*S);
+  const img=new Image(); img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(boardArtSVG());
+  await img.decode();
+  try{ await Promise.race([document.fonts.ready, new Promise(r=>setTimeout(r,2500))]); }catch(e){}
+  const cv=document.createElement('canvas'); cv.width=cw; cv.height=ch; const g=cv.getContext('2d');
+  g.drawImage(img,0,0,cw,ch);
+  g.setTransform(S,0,0,S,M*S,M*S);
+  const T=(str,x,y,size,col,{w='700',a='center',f='"Alegreya Sans", sans-serif',rtl=false,it=false}={})=>{ g.font=`${it?'italic ':''}${w} ${size}px ${f}`; g.fillStyle=col; g.textAlign=a; g.direction=rtl?'rtl':'ltr'; g.fillText(str,x,y); };
+  T('ولا غالب إلا الله',BW/2,-M+5+(M-10)/2+8,23,'#1C3F73',{w:'400',f:'"Aref Ruqaa","Amiri",serif',rtl:true});
+  T('إني جاعل في الأرض خليفة',BW/2,BH+5+(M-10)/2+7,21,'#1C3F73',{w:'400',f:'"Aref Ruqaa","Amiri",serif',rtl:true});
+  T('Patio de los Leones',6.5*U,9*U-7,9,'#3E5A34',{w:'400',it:true});
+  ROAD.forEach(([c,r],i)=>{ const x=c*U, y=r*U, sp=SPECIAL_AT[i];
+    if(sp){ const n=SPECIAL_INFO[sp].short; T(n,x+U/2,y+U-8,n.length>10?7.6:8.8,SP_INK[sp],{w:'800'}); }
+    else T(String(i),x+U-6,y+12,7.5,'#B89F6A',{a:'right',w:'500'}); });
+  PLOTS.forEach(pl=>{
+    const x=pl.x*U, y=pl.y*U, w=pl.w*U, h=pl.h*U, ink=CAT_INK[pl.t];
+    if(pl.w===1){ const L=LABELS[pl.key]||wrap(pl.short,10); L.forEach((ln,j)=>T(ln,x+w/2,y+h-28+j*10-(L.length-2)*10,8.8,ink,{w:'800'})); T(`Solar ${pl.land}`,x+w/2,y+h-7,7.8,'#4A3522',{w:'500'}); }
+    else if(pl.h===1){ T(`${pl.short} · ${pl.land}`,x+w/2,y+h-7,pl.w===2?8.2:9.6,ink,{w:'800'}); }
+    else { T(pl.short,x+w/2,y+h-19,11.5,ink,{w:'800'}); T(`Solar · ${pl.land}`,x+w/2,y+h-7,8.6,'#4A3522',{w:'500'}); }
+  });
+  return cv;
+}
+
+/* --- escena --- */
+const V3 = {};
+const MATS = {};
+const mat = (col,o={}) => { const k=col+JSON.stringify(o); if(MATS[k]) return MATS[k]; const m=new THREE.MeshStandardMaterial(Object.assign({color:col, roughness:.78, metalness:.02},o)); m.color.convertSRGBToLinear(); return (MATS[k]=m); };
+const GEO = {};
+const geo = (k,f) => GEO[k] || (GEO[k]=f());
+const cellXZ = i => { const [c,r]=ROAD[i]; return [c-6, r-5]; };
+const plotXZ = pl => [pl.x+pl.w/2-6.5, pl.y+pl.h/2-5.5];
+function horseshoe(w,hc,R){ const s=new THREE.Shape(); const dy=Math.sqrt(R*R-w*w); s.moveTo(-w,0); s.lineTo(-w,hc-dy); s.absarc(0,hc,R,Math.atan2(-dy,-w),Math.atan2(-dy,w),true); s.lineTo(w,0); s.lineTo(-w,0); return s; }
+function archFrameGeo(){ return geo('archFrame',()=>{ const o=horseshoe(.13,.2,.155); const hole=horseshoe(.075,.2,.095); o.holes.push(new THREE.Path(hole.getPoints(24))); return new THREE.ExtrudeGeometry(o,{depth:.05,bevelEnabled:false,curveSegments:20}); }); }
+function archFillGeo(){ return geo('archFill',()=>new THREE.ExtrudeGeometry(horseshoe(.075,.2,.095),{depth:.02,bevelEnabled:false,curveSegments:16})); }
+function smallArchGeo(sc){ return geo('sa'+sc,()=>new THREE.ExtrudeGeometry(horseshoe(.06*sc,.1*sc,.07*sc),{depth:.012,bevelEnabled:false,curveSegments:14})); }
+function put(par,m,x=0,y=0,z=0){ m.position.set(x,y,z); m.castShadow=true; par.add(m); return m; }
+function box(w,h,d,col,x,y,z){ const m=new THREE.Mesh(geo(`b${w},${h},${d}`,()=>new THREE.BoxGeometry(w,h,d)),mat(col)); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; return m; }
+function merl(g,w,d,y,col,cx=0,cz=0){
+  g.add(box(w+.02,.045,d+.02,col,cx,y+.022,cz));
+  const n=Math.max(3,Math.round(w/.075));
+  for(let k=0;k<n;k++){ const x=cx-w/2+.02+k*(w-.04)/(n-1); g.add(box(.032,.04,.032,col,x,y+.065,cz+d/2-.006)); g.add(box(.032,.04,.032,col,x,y+.065,cz-d/2+.006)); }
+}
+function frontArch(g,sc,x,y,z,col='#3A2718'){ const m=new THREE.Mesh(smallArchGeo(sc),mat(col)); m.position.set(x,y,z); g.add(m); return m; }
+const WALL3='#F2E5C9';
+function makeBuilding(lv,t,col,key){
+  const g=new THREE.Group();
+  if(lv>=2) for(const sx of [-1,1]){ const x=sx*.37; g.add(box(.28,.3,.34,WALL3,x,.15,0)); merl(g,.28,.34,.3,col,x,0); frontArch(g,1,x,0,.171); frontArch(g,.55,x,.18,.171); }
+  if(lv>=1){
+    g.add(box(.46,.48,.4,WALL3,0,.24,0)); merl(g,.46,.4,.48,col);
+    frontArch(g,1.35,0,0,.201); const ring=new THREE.Mesh(geo('ring',()=>{ const o=horseshoe(.1,.135,.118); o.holes.push(new THREE.Path(horseshoe(.081,.135,.095).getPoints(20))); return new THREE.ExtrudeGeometry(o,{depth:.014,bevelEnabled:false,curveSegments:18}); }),mat('#A8452A')); ring.position.set(0,0,.2); g.add(ring);
+    frontArch(g,.6,-.12,.3,.201); frontArch(g,.6,.12,.3,.201);
+  }
+  if(lv>=3){
+    if(t==='soc'){
+      put(g,new THREE.Mesh(geo('drum',()=>new THREE.CylinderGeometry(.17,.17,.05,24)),mat(WALL3)),0,.555,0);
+      const dome=new THREE.Mesh(geo('dome',()=>new THREE.SphereGeometry(.17,24,12,0,Math.PI*2,0,Math.PI/2)),mat('#C9A227',{metalness:.35,roughness:.4})); dome.position.set(0,.58,0); dome.castShadow=true; g.add(dome);
+      if(key==='universidad'){ g.add(box(.03,.13,.02,'#2B1D12',0,.66,.13)); }
+      else { g.add(box(.012,.09,.012,'#8B6B1E',0,.79,0)); const cr=new THREE.Mesh(geo('cres',()=>new THREE.TorusGeometry(.03,.009,6,14,Math.PI*1.5)),mat('#C9A227',{metalness:.4})); cr.position.set(0,.855,0); cr.rotation.z=Math.PI*1.25; g.add(cr); }
+      if(key==='mezquita'){
+        const mn=new THREE.Group(); mn.position.set(.56,0,-.12);
+        put(mn,new THREE.Mesh(geo('minar',()=>new THREE.CylinderGeometry(.045,.055,.95,12)),mat(WALL3)),0,.475,0);
+        put(mn,new THREE.Mesh(geo('balc',()=>new THREE.CylinderGeometry(.075,.075,.03,12)),mat(col)),0,.7,0);
+        put(mn,new THREE.Mesh(geo('cone',()=>new THREE.ConeGeometry(.05,.16,12)),mat('#C9A227',{metalness:.35,roughness:.4})),0,1.03,0);
+        mn.children.forEach(c=>c.castShadow=true); g.add(mn);
+      }
+    } else {
+      g.add(box(.2,.3,.2,WALL3,0,.63,0)); merl(g,.2,.2,.78,col); frontArch(g,.6,0,.62,.101);
+      g.add(box(.012,.34,.012,'#5B4330',.08,.99,0));
+      const pen=new THREE.Mesh(geo('pen',()=>{ const s=new THREE.Shape(); s.moveTo(0,0); s.lineTo(.16,-.045); s.lineTo(0,-.09); s.lineTo(0,0); return new THREE.ShapeGeometry(s); }),mat(col,{side:THREE.DoubleSide})); pen.position.set(.086,1.15,0); g.add(pen);
+    }
+  }
+  return g;
+}
+function makeFlag(col,sc=1){
+  const g=new THREE.Group();
+  g.add(box(.018,.5,.018,'#5B4330',0,.25,0));
+  const pen=new THREE.Mesh(geo('flagpen',()=>{ const s=new THREE.Shape(); s.moveTo(0,0); s.lineTo(.22,-.06); s.lineTo(0,-.13); s.lineTo(0,0); return new THREE.ShapeGeometry(s); }),mat(col,{side:THREE.DoubleSide}));
+  pen.position.set(.01,.49,0); pen.castShadow=true; g.add(pen);
+  put(g,new THREE.Mesh(geo('flagbase',()=>new THREE.CylinderGeometry(.05,.06,.03,12)),mat('#5B4330')),0,.015,0);
+  g.scale.setScalar(sc); return g;
+}
+function makeTray(n,col){
+  const g=new THREE.Group();
+  g.add(box(.6,.045,.16,'#6A4827',0,.022,0));
+  for(let j=0;j<8;j++){ const x=-.26+j*.0743;
+    if(j<n){ const q=new THREE.Mesh(geo('q',()=>new THREE.CylinderGeometry(.027,.027,.06,10)),mat(col)); q.position.set(x,.075,0); q.castShadow=true; g.add(q); }
+    else { const h=new THREE.Mesh(geo('qh',()=>new THREE.CylinderGeometry(.027,.027,.006,10)),mat('#2A1A0E')); h.position.set(x,.047,0); g.add(h); } }
+  return g;
+}
+function makeDoor(col){
+  const g=new THREE.Group();
+  const f=new THREE.Mesh(archFrameGeo(),mat(col)); f.castShadow=true; f.position.z=-.025; g.add(f);
+  const i=new THREE.Mesh(archFillGeo(),mat('#2B1D12')); i.position.z=-.03; g.add(i);
+  g.add(box(.3,.03,.08,'#8B7650',0,.015,0));
+  return g;
+}
+function makePawn(col){
+  const pts=[[0,0],[.13,0],[.13,.035],[.085,.06],[.05,.17],[.08,.2],[.045,.225],[.075,.28],[.065,.33],[.03,.355],[0,.36]].map(([x,y])=>new THREE.Vector2(x,y));
+  const m=new THREE.Mesh(geo('pawn',()=>new THREE.LatheGeometry(pts,24)),mat(col,{roughness:.35,metalness:.15}));
+  m.castShadow=true; return m;
+}
+function facing(pl){
+  let best=null; for(const i of pl.roads){ const [dx,dy]=pl.dir[i]; const f=[-dx,-dy]; if(!best || f[1]>best[1]) best=f; }
+  return best ? Math.atan2(best[0],best[1]) : 0;
+}
+function plotLayout(pl){
+  if(pl.w===1) return {b:[0,-.1], t:[0,-(pl.h/2-.38)], sc:.9};
+  if(pl.h===1) return pl.w===2 ? {b:[.42,-.06], t:[-.6,-.12], sc:.85} : {b:[.1,-.06], t:[-1.02,-.12], sc:.9};
+  return {b:[.3,-.15], t:[-1.02,-.55], sc:1.2};
+}
+
+async function init3D(){
+  const host=$('#scene');
+  if(!window.THREE){ host.innerHTML='<p class="noweb">No se ha podido cargar el motor 3D. Abre jalifa-v2.html para jugar en 2D.</p>'; return false; }
+  let R; try{ R=new THREE.WebGLRenderer({antialias:true,alpha:true}); }catch(e){ host.innerHTML='<p class="noweb">Tu navegador no permite WebGL. Abre jalifa-v2.html para jugar en 2D.</p>'; return false; }
+  R.setPixelRatio(Math.min(2,devicePixelRatio||1)); R.shadowMap.enabled=true; R.shadowMap.type=THREE.PCFSoftShadowMap; R.outputEncoding=THREE.sRGBEncoding;
+  host.prepend(R.domElement);
+  const S=new THREE.Scene();
+  const C=new THREE.PerspectiveCamera(36,1,.1,200); C.position.set(0,14.4,15.2);
+  const O=new THREE.OrbitControls(C,R.domElement); O.enableDamping=true; O.dampingFactor=.08; O.maxPolarAngle=1.3; O.minDistance=4; O.maxDistance=30; O.target.set(0,0,1.6); O.screenSpacePanning=false;
+  S.add(new THREE.HemisphereLight('#FFF4DC','#4A3624',.62));
+  const D=new THREE.DirectionalLight('#FFF0D2',.9); D.position.set(7,16,9); D.castShadow=true; D.shadow.mapSize.set(2048,2048);
+  Object.assign(D.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:1,far:45}); D.shadow.bias=-.0006; S.add(D);
+  const amb=new THREE.AmbientLight('#FFE9C7',.18); S.add(amb);
+  const table=new THREE.Mesh(new THREE.PlaneGeometry(80,80),mat('#5A3B24',{roughness:.9})); table.rotation.x=-Math.PI/2; table.position.y=-.36; table.receiveShadow=true; S.add(table);
+  const cv=await makeBoardCanvas();
+  const tex=new THREE.CanvasTexture(cv); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=R.capabilities.getMaxAnisotropy();
+  const side=mat('#1C3F73'), top=new THREE.MeshStandardMaterial({map:tex,roughness:.85});
+  const board=new THREE.Mesh(new THREE.BoxGeometry(TW,.34,TH),[side,side,top,side,side,side]); board.position.y=-.17; board.receiveShadow=true; S.add(board);
+  const G3={plots:new THREE.Group(), doors:new THREE.Group(), pawns:new THREE.Group(), fx:new THREE.Group(), decks:new THREE.Group()};
+  Object.values(G3).forEach(g=>S.add(g));
+  // fuente
+  { const f=new THREE.Group(); f.position.set(0,0,3);
+    put(f,new THREE.Mesh(new THREE.CylinderGeometry(.5,.55,.12,8),mat('#EFE6D2')),0,.06,0);
+    put(f,new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.02,24),mat('#4F9DB2',{roughness:.2,metalness:.1})),0,.125,0);
+    for(let k=0;k<12;k++){ const a=Math.PI*2*k/12; const l=box(.07,.09,.12,'#D9C9A3',Math.cos(a)*.3,.17,Math.sin(a)*.3); l.rotation.y=-a; f.add(l); }
+    put(f,new THREE.Mesh(new THREE.CylinderGeometry(.14,.06,.28,12),mat('#EFE6D2')),0,.26,0);
+    put(f,new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.14,8),mat('#9FD0DA',{transparent:true,opacity:.8})),0,.46,0);
+    f.children.forEach(c=>c.castShadow=true); S.add(f);
+    for(const [x,z] of [[-1.1,2.55],[1.1,2.55],[-1.1,3.45],[1.1,3.45]]){ const cy=new THREE.Mesh(geo('cyp',()=>new THREE.ConeGeometry(.12,.7,10)),mat('#2F5B3A')); cy.position.set(x,.35,z); cy.castShadow=true; S.add(cy); }
+  }
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.4,.47,4,1,Math.PI/4),new THREE.MeshBasicMaterial({color:'#E0B84A',side:THREE.DoubleSide,transparent:true,opacity:.95}));
+  ring.rotation.x=-Math.PI/2; ring.position.y=.012; ring.visible=false; S.add(ring);
+  Object.assign(V3,{R,S,C,O,G3,host,board,ring,plotCache:{},doorCache:{},pawns:{},cand:new Map(),follow:false,tl:null});
+  buildDecks();
+  const ro=new ResizeObserver(()=>{ const w=host.clientWidth, h=host.clientHeight; R.setSize(w,h,false); R.domElement.style.width=w+'px'; R.domElement.style.height=h+'px'; C.aspect=w/h; C.updateProjectionMatrix(); });
+  ro.observe(host);
+  setupPicking();
+  requestAnimationFrame(loop);
+  return true;
+}
+function deckTexture(title,ic,bg,ink){
+  const c=document.createElement('canvas'); c.width=256; c.height=358; const g=c.getContext('2d');
+  g.fillStyle=bg; g.fillRect(0,0,256,358); g.strokeStyle=ink; g.lineWidth=8; g.strokeRect(14,14,228,330);
+  g.lineWidth=2; g.strokeRect(26,26,204,306);
+  g.fillStyle=ink; g.font='700 30px "El Messiri", Georgia, serif'; g.textAlign='center'; g.fillText(title,128,300);
+  const img=new Image(); img.onload=()=>{ g.drawImage(img,78,80,100,100); t.needsUpdate=true; };
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="${ink}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICONS[ic]}</svg>`);
+  const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; return t;
+}
+function buildDecks(){
+  const D=V3.G3.decks; D.position.set(0,-.34,7.05);
+  const mk=(x,title,ic,bg,ink)=>{ const g=new THREE.Group(); g.position.x=x;
+    for(let k=0;k<9;k++){ const c=box(1,.014,1.4,bg,(Math.random()-.5)*.03,.007+k*.015,(Math.random()-.5)*.03); c.rotation.y=(Math.random()-.5)*.05; g.add(c); }
+    const topM=new THREE.Mesh(geo('cardtop',()=>new THREE.BoxGeometry(1,.014,1.4)),[mat(bg),mat(bg),new THREE.MeshStandardMaterial({map:deckTexture(title,ic,bg,ink),roughness:.7}),mat(bg),mat(bg),mat(bg)]);
+    topM.position.y=.007+9*.015; topM.castShadow=true; g.add(topM); g.userData.top=topM; D.add(g); return g; };
+  V3.deckRec=mk(-2.4,'Recordatorio','book','#EEDB94','#7A5A0E');
+  V3.deckSuc=mk(-.9,'Sucesos','bolt','#E3B3A1','#8A3520');
+  const bm=new THREE.Group(); bm.position.set(1.4,0,0); D.add(bm);
+  bm.add(box(1.1,.34,.7,'#6A4827',0,.17,0)); bm.add(box(1.14,.05,.74,'#C9A227',0,.35,0)); bm.add(box(.12,.12,.04,'#C9A227',0,.24,.36));
+  V3.coins=new THREE.Group(); V3.coins.position.set(1.4,0,.75); D.add(V3.coins);
+}
+function syncCoins(){
+  if(!V3.coins) return; const n=G?Math.min(30,Math.round(G.bm/40)):0;
+  if(V3.coins.userData.n===n) return; V3.coins.userData.n=n; V3.coins.clear();
+  for(let k=0;k<n;k++){ const s=Math.floor(k/6), c=new THREE.Mesh(geo('coin',()=>new THREE.CylinderGeometry(.09,.09,.028,16)),mat('#D4A92C',{metalness:.5,roughness:.35})); c.position.set(-.45+s*.22,.014+(k%6)*.03,0); c.castShadow=true; V3.coins.add(c); }
+}
+
+/* --- sincronizar estado --- */
+function syncPlots(){
+  if(!V3.R) return;
+  PLOTS.forEach(pl=>{
+    const o=G?G.owner[pl.i]:null, lv=G?G.level[pl.i]:0, tr=G?G.tray[pl.i]:0;
+    const sig=`${o}|${lv}|${tr}`; const prev=V3.plotCache[pl.i];
+    if(prev && prev.sig===sig) return;
+    if(prev) V3.G3.plots.remove(prev.g);
+    const g=new THREE.Group(); const [px,pz]=plotXZ(pl); g.position.set(px,0,pz);
+    if(o!=null){
+      const col=G.players[o].color, L=plotLayout(pl);
+      const w=pl.w-.1, d=pl.h-.1;
+      const tint=new THREE.Mesh(geo(`tint${pl.w}${pl.h}`,()=>new THREE.PlaneGeometry(w,d)),mat(col,{transparent:true,opacity:.22})); tint.rotation.x=-Math.PI/2; tint.position.y=.004; tint.receiveShadow=true; g.add(tint);
+      g.add(box(w,.035,.04,col,0,.018,-d/2)); g.add(box(w,.035,.04,col,0,.018,d/2)); g.add(box(.04,.035,d,col,-w/2,.018,0)); g.add(box(.04,.035,d,col,w/2,.018,0));
+      if(lv===0){ g.add(makeFlag(col,1.1)); }
+      else {
+        const b=makeBuilding(lv,pl.t,col,pl.key); b.position.set(L.b[0],0,L.b[1]); b.rotation.y=facing(pl); b.scale.setScalar(L.sc); g.add(b);
+        const f=makeFlag(col,.7); f.position.set(w/2-.15,0,-d/2+.15); g.add(f);
+        if(pl.t==='soc'){ const t=makeTray(tr,col); t.position.set(L.t[0],0,L.t[1]); g.add(t); }
+        if(!prev || +prev.sig.split('|')[1]<lv){ b.scale.setScalar(.01); tween(520,e=>b.scale.setScalar(Math.max(.01,L.sc*(e<.7?e/.7*1.1:1.1-(e-.7)/.3*.1)))); }
+      }
+    }
+    V3.G3.plots.add(g); V3.plotCache[pl.i]={sig,g};
+  });
+  syncCoins();
+}
+function syncDoors(){
+  if(!V3.R) return;
+  for(let i=0;i<N;i++){
+    const k=G?G.door[i]:null; const sig=k==null?'':`${k}|${G.owner[k]}`;
+    const prev=V3.doorCache[i]; if((prev?.sig||'')===sig) continue;
+    if(prev) V3.G3.doors.remove(prev.g);
+    if(k==null){ delete V3.doorCache[i]; continue; }
+    const g=makeDoor(G.players[G.owner[k]].color); const [x,z]=cellXZ(i); const [dx,dy]=PLOTS[k].dir[i]||[0,-1];
+    g.position.set(x+dx*.33,0,z+dy*.33); g.rotation.y=Math.atan2(-dx,-dy);
+    V3.G3.doors.add(g); V3.doorCache[i]={sig,g};
+    g.scale.setScalar(.01); tween(380,e=>g.scale.setScalar(Math.max(.01,e)));
+  }
+}
+const PAWN_OFF=[[-.2,-.18],[.2,-.18],[-.2,.2],[.2,.2]];
+function pawnTarget(p){ const occ=G.players.filter(q=>q.pos===p.pos).map(q=>q.id); const j=occ.indexOf(p.id); const [x,z]=cellXZ(p.pos); const [ox,oz]=PAWN_OFF[j%4]; return new THREE.Vector3(x+ox,0,z+oz); }
+function syncPawns(animatePid,jump){
+  if(!V3.R) return Promise.resolve();
+  if(!G){ V3.G3.pawns.clear(); V3.pawns={}; V3.ring.visible=false; return Promise.resolve(); }
+  const ps=[];
+  G.players.forEach(p=>{
+    let m=V3.pawns[p.id];
+    if(!m || m.userData.col!==p.color){ if(m) V3.G3.pawns.remove(m); m=makePawn(p.color); m.userData.col=p.color; V3.G3.pawns.add(m); V3.pawns[p.id]=m; m.position.copy(pawnTarget(p)); }
+    const to=pawnTarget(p), from=m.position.clone();
+    if(from.distanceTo(to)<.001) return;
+    const hop = p.id===animatePid ? (jump?1.6:.35) : 0;
+    const dur = p.id===animatePid ? (jump?420:130) : 160;
+    ps.push(tween(dur*SPEED,e=>{ m.position.lerpVectors(from,to,e); m.position.y=Math.sin(Math.PI*e)*hop; }));
+  });
+  const cp=G.players[G.cur];
+  if(cp && !G.over){ const [x,z]=cellXZ(cp.pos); V3.ring.position.set(x,.012,z); V3.ring.visible=true; if(V3.follow) focusOn(x,z,null,500); } else V3.ring.visible=false;
+  return Promise.all(ps);
+}
+function renderBoard3D(){ syncPlots(); syncDoors(); syncPawns(); }
+
+/* --- animación --- */
+const TWEENS=[];
+function tween(dur,fn){ return new Promise(res=>{ TWEENS.push({t0:performance.now(),dur:Math.max(1,dur),fn,res}); }); }
+function loop(now){
+  requestAnimationFrame(loop);
+  if(document.hidden) return;
+  for(let k=TWEENS.length-1;k>=0;k--){ const t=TWEENS[k]; const e=Math.min(1,(now-t.t0)/t.dur); t.fn(e); if(e>=1){ TWEENS.splice(k,1); t.res(); } }
+  const pulse=.5+.5*Math.sin(now/220);
+  V3.cand.forEach((m,i)=>{ const sel=PICK&&PICK.sel.includes(i); m.material.color.set(sel?'#1E6B52':'#E0B84A'); m.material.opacity=sel?.95:.35+.6*pulse; });
+  if(V3.tl){ V3.tl.material.opacity=.3+.65*pulse; }
+  V3.O.update(); V3.R.render(V3.S,V3.C);
+}
+function focusOn(x,z,dist,dur=650){
+  const O=V3.O, C=V3.C; const t0=O.target.clone(), p0=C.position.clone();
+  const t1=new THREE.Vector3(x,0,z); const off=p0.clone().sub(t0); if(dist) off.setLength(dist);
+  const p1=t1.clone().add(off);
+  return tween(dur,e=>{ const k=e<.5?2*e*e:1-Math.pow(-2*e+2,2)/2; O.target.lerpVectors(t0,t1,k); C.position.lerpVectors(p0,p1,k); });
+}
+function setView(kind){
+  const O=V3.O, C=V3.C; const t0=O.target.clone(), p0=C.position.clone();
+  const t1=new THREE.Vector3(0,0,kind==='top'?.8:1.6), p1= kind==='top'?new THREE.Vector3(0,21,.81):new THREE.Vector3(0,14.4,15.2);
+  return tween(700,e=>{ const k=e<.5?2*e*e:1-Math.pow(-2*e+2,2)/2; O.target.lerpVectors(t0,t1,k); C.position.lerpVectors(p0,p1,k); });
+}
+async function drawCardFX(deck){
+  const d = deck==='rec'?V3.deckRec:V3.deckSuc; if(!d) return;
+  const c=d.userData.top; const y0=c.position.y;
+  await tween(420*SPEED,e=>{ c.position.y=y0+e*1.4; c.rotation.z=Math.PI*e; c.position.x=Math.sin(Math.PI*e)*.3; });
+  tween(300,e=>{ c.position.y=y0+1.4*(1-e); c.rotation.z=Math.PI*(1-e); c.position.x=0; });
+}
+
+/* --- selección con el ratón --- */
+function setupPicking(){
+  const el=V3.R.domElement, rc=new THREE.Raycaster(), v=new THREE.Vector2(); let down=null;
+  const hit=e=>{ const r=el.getBoundingClientRect(); v.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1); rc.setFromCamera(v,V3.C);
+    const h=rc.intersectObjects([V3.board,V3.G3.plots,V3.G3.doors],true)[0]; if(!h) return null;
+    const c=Math.floor(h.point.x+6.5), r2=Math.floor(h.point.z+5.5);
+    const ri=ROAD_AT.get(c+','+r2); if(ri!=null) return {road:ri};
+    const pl=PLOTS.find(p=>c>=p.x&&c<p.x+p.w&&r2>=p.y&&r2<p.y+p.h); return pl?{plot:pl.i}:null; };
+  el.addEventListener('pointerdown',e=>{ down=[e.clientX,e.clientY]; });
+  el.addEventListener('pointerup',e=>{ if(!down) return; const moved=Math.hypot(e.clientX-down[0],e.clientY-down[1]); down=null; if(moved>6) return;
+    const h=hit(e); if(!h) return; if(h.road!=null) roadClick(h.road); else if(h.plot!=null) showDeed(h.plot); });
+  let last=0; el.addEventListener('pointermove',e=>{ if(e.buttons) return; const n=performance.now(); if(n-last<80) return; last=n; const h=hit(e); el.style.cursor = h && (h.plot!=null || (h.road!=null && (SPECIAL_AT[h.road] || (PICK&&PICK.cand.has(h.road))))) ? 'pointer' : 'grab'; });
+}
+function showCandidates(set){
+  V3.cand.forEach(m=>V3.G3.fx.remove(m)); V3.cand.clear();
+  if(!set) return;
+  for(const i of set){ const m=new THREE.Mesh(geo('candring',()=>new THREE.RingGeometry(.34,.46,4,1,Math.PI/4)),new THREE.MeshBasicMaterial({color:'#E0B84A',transparent:true,opacity:.8,side:THREE.DoubleSide})); m.rotation.x=-Math.PI/2; const [x,z]=cellXZ(i); m.position.set(x,.016,z); V3.G3.fx.add(m); V3.cand.set(i,m); }
+}
+function tutMark(kind,idx){
+  if(V3.tl){ V3.G3.fx.remove(V3.tl); V3.tl=null; }
+  if(kind==null) return;
+  let x,z,w,d;
+  if(kind==='plot'){ const pl=PLOTS[idx]; [x,z]=plotXZ(pl); w=pl.w; d=pl.h; } else { [x,z]=cellXZ(idx); w=d=1; }
+  const s=new THREE.Shape(); s.moveTo(-w/2,-d/2); s.lineTo(w/2,-d/2); s.lineTo(w/2,d/2); s.lineTo(-w/2,d/2); s.lineTo(-w/2,-d/2);
+  const h=new THREE.Path(); const q=.09; h.moveTo(-w/2+q,-d/2+q); h.lineTo(-w/2+q,d/2-q); h.lineTo(w/2-q,d/2-q); h.lineTo(w/2-q,-d/2+q); h.lineTo(-w/2+q,-d/2+q); s.holes.push(h);
+  const m=new THREE.Mesh(new THREE.ShapeGeometry(s),new THREE.MeshBasicMaterial({color:'#E0B84A',transparent:true,side:THREE.DoubleSide}));
+  m.rotation.x=-Math.PI/2; m.position.set(x,.02,z); V3.G3.fx.add(m); V3.tl=m;
+  focusOn(x,z,11);
+}
+
+/* ====================== ESTADO UI ====================== */
+let G=null, SPEED=1, paused=false, pauseWaiters=[], waiters={}, lastSetup=null, lastTick=0, LOG=[], PICK=null, GEN=0;
+try{ SPEED=parseFloat(localStorage.getItem('jalifa3d-speed'))||1; }catch(e){}
+$('#speedSel').value=String(SPEED); if(!$('#speedSel').value){ $('#speedSel').value='1'; SPEED=1; }
+function unpaused(){ return paused?new Promise(r=>pauseWaiters.push(r)):Promise.resolve(); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms*SPEED)).then(unpaused); }
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+function setDie(el,n){ el.innerHTML=Array.from({length:9},(_,k)=>`<span class="${PIPS[n].includes(k)?'on':''}"></span>`).join(''); el.setAttribute('aria-label',`Dado: ${n}`); }
+function setSpecial(html,label){ $('#d3').innerHTML=html; $('#d3l').textContent=label; }
+async function animateDice(els,final,faceFn){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  els.forEach(e=>e.classList.add('roll'));
+  for(let k=0;k<(reduce?1:6);k++){ els.forEach(e=>faceFn(e,null)); await new Promise(r=>setTimeout(r,65)); }
+  els.forEach((e,j)=>{ e.classList.remove('roll'); faceFn(e,final[j]); });
+}
+function setEvent(html){ $('#event').innerHTML=html; }
+function pushLog(msg,cls=''){ LOG.unshift({msg,cls}); LOG=LOG.slice(0,150); $('#log').innerHTML=LOG.map(l=>`<div class="${l.cls}">${esc(l.msg)}</div>`).join(''); }
+
+function renderStatus(){
+  if(!G){ $('#turnbox').innerHTML=''; $('#roundN').textContent='–'; return; }
+  const p=G.players[G.cur];
+  $('#turnbox').innerHTML = p ? `<span class="pawn" style="--pc:${p.color}">${esc(p.name[0])}</span><span><small>Turno de</small><b>${esc(p.name)}</b></span>` : '';
+  $('#roundN').textContent = G.overtime ? 'Prórroga' : G.mode==='rounds' ? `${Math.min(G.round,G.maxRounds)} / ${G.maxRounds}` : G.round;
+  $('#bmPot').textContent = G.bm;
+  $('#clockBox').hidden = G.mode!=='time';
+}
+function renderPlayers(){
+  if(!G){ $('#players').innerHTML='<div class="hint">Aún no hay partida.</div>'; return; }
+  const cur=G.players[G.cur];
+  $('#players').innerHTML = G.players.map(p=>{
+    const props=ownedList(G,p.id);
+    const debts=p.debts.map(d=>`debe ${d.amount} a ${d.to==='bm'?'Bayt al-Mal':d.to==='bank'?'la banca':esc(G.players[d.to].name)}`).join(' · ');
+    const owed=G.players.filter(q=>q.debts.some(d=>d.to===p.id));
+    const human=p.kind==='human', myTurn=cur&&cur.id===p.id&&(waiters.end||waiters.roll);
+    let btns='';
+    if(human && !G.over){
+      if(owed.length && G.R.forgive) btns+=owed.map(q=>`<button class="btn small" data-forgive="${q.id}" data-by="${p.id}">Condonar a ${esc(q.name)}</button>`).join('');
+      if(myTurn && props.some(pl=>pl.t==='co')) btns+=`<button class="btn small" data-sell="${p.id}">Vender empresa</button>`;
+    }
+    return `<div class="pcard${cur&&cur.id===p.id&&!G.over?' active':''}" style="--pc:${p.color}">
+      <span class="pawn" style="--pc:${p.color}">${esc(p.name[0])}</span>
+      <span class="who"><b>${esc(p.name)}</b><small>${human?'Humano':PROFILES[p.kind].label}${p.skip?' · pierde turno':''}</small></span>
+      <span class="score"><b>${score(G,p)}</b><small>quesitos</small></span>
+      <span class="meta"><span class="cash">${p.cash} dinares</span>${debts?`<span class="debt">${debts}</span>`:''}</span>
+      <span class="deeds">Buenas obras <span class="tray8" style="--owner:${p.color}">${Array.from({length:8},(_,k)=>`<i class="${k<p.deeds?'on':''}"></i>`).join('')}</span></span>
+      ${props.length?`<span class="hand">${props.map(pl=>`<button class="mcard ${pl.t}" data-deed="${pl.i}" aria-label="${esc(pl.name)}"><span class="mc-top">${icon(pl.icon)}</span><span class="mc-name">${esc(pl.short)}</span><span class="mc-lv">${[1,2,3].map(j=>`<i class="${j<=G.level[pl.i]?'on':''}"></i>`).join('')}</span><span class="mc-foot">${pl.t==='soc'?`${G.tray[pl.i]}/8`:`${doorsOf(G,pl.i).length} ${doorsOf(G,pl.i).length===1?'puerta':'puertas'}`}</span></button>`).join('')}</span>`:''}
+      ${btns?`<span class="pbtns">${btns}</span>`:''}
+    </div>`;
+  }).join('');
+}
+function renderActions(){
+  const a=$('#actions');
+  if(!G){ a.innerHTML=`<div class="hint">Configura una partida o sigue el tutorial para aprender a jugar.</div><div class="row"><button class="btn primary big" id="aStart">Configurar partida</button></div>`; $('#aStart').onclick=openSetup; return; }
+  if(G.over){ a.innerHTML=`<div class="hint">La partida ha terminado.</div><div class="row"><button class="btn primary big" id="aAgain">Jugar otra vez</button></div>`; $('#aAgain').onclick=openSetup; return; }
+  const p=G.players[G.cur]; let h='';
+  if(PICK){
+    const n=PICK.sel.length;
+    h=`<div class="hint"><b>Coloca puertas.</b> Toca en el tablero las casillas marcadas en dorado. Cada puerta cuesta ${PICK.cost||'0 (gratis)'}. Máximo ${PICK.max}.</div>
+       <div class="hint">Seleccionadas: <b>${n}</b>${PICK.cost?` · coste ${n*PICK.cost}`:''}</div>
+       <div class="row"><button class="btn primary big" id="pkOk" ${n?'':'disabled'}>Abrir ${n||''} puerta${n===1?'':'s'}</button><button class="btn" id="pkNo">No abrir</button></div>`;
+  } else if(waiters.roll) h=`<div class="hint">${esc(p.name)}, te toca. Antes de tirar puedes vender empresas o condonar deudas desde tu ficha.</div><div class="row"><button class="btn primary big" id="aRoll">Tirar dados</button></div>`;
+  else if(waiters.end) h=`<div class="hint">${hasDebt(p)?'Tienes deudas: puedes vender una empresa al banco por la mitad de lo invertido.':'Turno resuelto.'}</div><div class="row"><button class="btn gold big" id="aEnd">Terminar turno</button></div>`;
+  else h=`<div class="hint">${isAI(CTX,p)?`${esc(p.name)} está jugando…`:'Resolviendo la casilla…'}</div>`;
+  if(G.lastRound && !G.overtime) h+=`<div class="hint" style="color:var(--bad);font-weight:700">Se acabó el tiempo: última ronda.</div>`;
+  if(G.overtime) h+=`<div class="hint" style="color:var(--soc);font-weight:700">Prórroga entre ${G.overtime.map(i=>esc(G.players[i].name)).join(' y ')}.</div>`;
+  if(G.mode==='target' && !G.overtime) h+=`<div class="hint">Meta: el primero en llegar a <b>${G.target}</b> quesitos.</div>`;
+  a.innerHTML=h;
+  if($('#aRoll')) $('#aRoll').onclick=()=>release('roll');
+  if($('#aEnd')) $('#aEnd').onclick=()=>release('end');
+  if($('#pkOk')) $('#pkOk').onclick=()=>endPick(true);
+  if($('#pkNo')) $('#pkNo').onclick=()=>endPick(false);
+}
+function renderAll(){ if(V3.R) renderBoard3D(); renderStatus(); renderPlayers(); renderActions(); }
+function release(k){ const r=waiters[k]; waiters[k]=null; if(r) r(); renderActions(); renderPlayers(); }
+function waitFor(k){ return new Promise(r=>{ waiters[k]=r; renderActions(); renderPlayers(); }); }
+
+/* selección de puertas en el tablero */
+function startPick(p,data){
+  return new Promise(res=>{
+    const cand=new Map();
+    data.plots.forEach(k=>freeSlots(G,k).forEach(i=>{ if(!cand.has(i)) cand.set(i,k); }));
+    PICK={cand, sel:[], max:data.max, cost:data.cost, res};
+    showCandidates([...cand.keys()]);
+    renderActions();
+    $('#actionsPanel').scrollIntoView({block:'nearest',behavior:'smooth'});
+  });
+}
+function roadClick(i){
+  if(PICK && PICK.cand.has(i)){
+    const j=PICK.sel.indexOf(i);
+    if(j>=0) PICK.sel.splice(j,1); else if(PICK.sel.length<PICK.max && (!PICK.cost || (PICK.sel.length+1)*PICK.cost<=G.players[G.cur].cash)) PICK.sel.push(i);
+    renderActions(); return;
+  }
+  const sp=SPECIAL_AT[i];
+  if(sp && $('#modal').hidden){ const inf=SPECIAL_INFO[sp]; modal(`<div class="gcard sp"><div class="gcard-top">${icon(inf.icon)}<div><div class="k">Casilla especial</div><h3>${esc(inf.name)}</h3></div></div><div class="gcard-body"><p style="margin:0">${inf.desc}</p></div></div>`,[{label:'Cerrar',value:null}]); }
+}
+function endPick(ok){
+  if(!PICK) return;
+  const out = ok ? PICK.sel.map(i=>({sq:i, plot:PICK.cand.get(i)})) : [];
+  const r=PICK.res; PICK=null;
+  showCandidates(null);
+  renderActions(); r(out);
+}
+
+/* modales */
+function modal(html,buttons,dismiss=true){
+  return new Promise(res=>{
+    $('#modalBody').innerHTML = html + `<div class="modal-btns">${buttons.map((b,k)=>`<button class="btn ${b.primary?'primary':''}" data-k="${k}">${esc(b.label)}</button>`).join('')}</div>`;
+    const m=$('#modal'); m.hidden=false;
+    const done=v=>{ m.hidden=true; m.onclick=null; document.removeEventListener('keydown',onKey); res(v); };
+    const onKey=e=>{ if(e.key==='Escape'&&dismiss) done(buttons[buttons.length-1].value); };
+    document.addEventListener('keydown',onKey);
+    m.onclick=e=>{ const b=e.target.closest('[data-k]'); if(b) done(buttons[+b.dataset.k].value); else if(e.target===m&&dismiss) done(buttons[buttons.length-1].value); };
+    setTimeout(()=>{ const f=$('#modalBody .btn.primary')||$('#modalBody .btn'); f&&f.focus(); },30);
+  });
+}
+function figsRow(pl,lv,col){
+  return `<div class="figs">${pl.stages.map((st,j)=>`<figure class="${j<lv?'done':'todo'}">${figSVG(j+1,pl.t,col||CAT_INK[pl.t],pl.key)}<figcaption>${j+1}. ${esc(st)}</figcaption></figure>`).join('')}</div>`;
+}
+function deedHTML(k,extra=''){
+  const pl=PLOTS[k], o=G&&G.owner[k]!=null?G.players[G.owner[k]]:null, lv=G?G.level[k]:0;
+  if(!pl.rate) applyRates(G?G.R:DEFAULT_RULES);
+  let rows=`<span>Solar</span><span>${pl.land}</span>`;
+  pl.stages.forEach((st,j)=>rows+=`<span>Fase ${j+1} · ${esc(st)}</span><span>${pl.cost[j]}</span>`);
+  if(pl.t==='co') rows+=`<span>Cobro por estancia (nivel 1 / 2 / 3)</span><span>dado × ${pl.rate.join(' / ')}</span>`;
+  else rows+=`<span>Quesitos por visita</span><span>= nivel (1 / 2 / 3)</span>`;
+  rows+=`<span>Casillas donde abrir puerta</span><span>${pl.slots.length}</span>`;
+  let body=figsRow(pl,o?lv:3,o?o.color:null)+`<div class="rows">${rows}</div>`;
+  if(pl.t==='soc') body+=`<div class="hint">Entidad social: bandeja de 8 quesitos. Es un waqf y no se puede vender.</div>`;
+  else if(pl.svc) body+=`<div class="hint">Servicio: ${esc(pl.svc)}</div>`;
+  if(o) body+=`<div class="fx">Propiedad de <b style="color:${o.color}">${esc(o.name)}</b> · nivel ${lv} · ${doorsOf(G,k).length} puerta${doorsOf(G,k).length===1?'':'s'}${pl.t==='soc'?` · ${G.tray[k]}/8 quesitos`:''}</div>`;
+  return `<div class="gcard ${pl.t}"><div class="gcard-top">${icon(pl.icon)}<div><div class="k">${pl.t==='co'?'Empresa':'Entidad social'}</div><h3>${esc(pl.name)}</h3></div></div><div class="gcard-body">${body}${extra}</div></div>`;
+}
+function showDeed(k){ if($('#modal').hidden && !PICK) modal(deedHTML(k),[{label:'Cerrar',value:null}]); }
+function cardHTML(c,deck,extra=''){
+  return `<div class="gcard ${deck}"><div class="gcard-top">${icon(deck==='rec'?'book':'bolt')}<div><div class="k">${deck==='rec'?'Recordatorio':'Sucesos'}</div><h3>${esc(c.title)}</h3></div></div><div class="gcard-body">${deck==='rec'?`<q>${esc(c.text)}</q><cite>${esc(c.src)}</cite>`:`<p style="margin:0">${esc(c.text)}</p>`}${extra}</div></div>`;
+}
+async function sellDialog(p){
+  const cos=ownedList(G,p.id,'co'); if(!cos.length) return;
+  const v=await modal(`<h3 style="margin:0 0 6px;font-family:var(--f-display)">Vender una empresa</h3><p class="hint">El banco paga la mitad de lo invertido en solar y edificios. Las puertas se retiran. Si tienes deudas, el dinero se usa primero para pagarlas.</p>`,
+    cos.map(pl=>({label:`${pl.short} · ${sellValue(G,pl.i)}`,value:pl.i})).concat([{label:'Cancelar',value:null}]));
+  if(v!=null){ sellCompany(G,CTX,p,v); renderAll(); }
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-deed],[data-forgive],[data-sell]'); if(!t||!G) return;
+  if(t.dataset.deed) showDeed(+t.dataset.deed);
+  if(t.dataset.forgive){ forgiveDebt(G,CTX,G.players[+t.dataset.by],G.players[+t.dataset.forgive]); renderAll(); }
+  if(t.dataset.sell) sellDialog(G.players[+t.dataset.sell]);
+});
+
+/* ====================== CONTEXTO UI ====================== */
+const BASE = {
+  sim:false,
+  log:(m,c)=>{ pushLog(m,c); setEvent(esc(m)); },
+  update:()=>renderAll(),
+  changed:async()=>{ syncPlots(); syncDoors(); renderPlayers(); await sleep(300); },
+  wait:ms=>sleep(ms),
+  step:async(p,jump)=>{ await syncPawns(p.id,jump); await unpaused(); },
+  rollDice:async(p)=>{
+    if(!isAI(CTX,p)) await waitFor('roll'); else await sleep(450);
+    const a=1+Math.floor(Math.random()*6), b=1+Math.floor(Math.random()*6);
+    await animateDice([$('#d1'),$('#d2')],[a,b],(el,v)=>setDie(el,v||1+Math.floor(Math.random()*6)));
+    return [a,b];
+  },
+  rollStay:async(p,k)=>{
+    const v=1+Math.floor(Math.random()*6);
+    $('#d3').innerHTML=''; $('#d3').classList.remove('special'); $('#d3l').textContent='Estancia';
+    await animateDice([$('#d3')],[v],(el,x)=>setDie(el,x||1+Math.floor(Math.random()*6)));
+    await sleep(500);
+    return v;
+  },
+  permitRoll:async(p,k)=>{
+    const f=PERMIT_FACES[Math.floor(Math.random()*6)];
+    const faces=Object.keys(PERMIT_ICON);
+    $('#d3').classList.add('special'); $('#d3l').textContent='Dado del Diwan';
+    await animateDice([$('#d3')],[f],(el,x)=>{ el.innerHTML=permitSVG(x||faces[Math.floor(Math.random()*4)]); });
+    const [t,d]=PERMIT_TEXT[f];
+    setEvent(`<span class="k">Diwan</span>${esc(p.name)} pide licencia para ${esc(PLOTS[k].short)}: <b>${t}</b>. ${d}`);
+    if(!isAI(CTX,p)) await modal(`<div class="permit"><div class="face">${permitSVG(f,46)}</div><div><span class="hint">Dado del Diwan · ${esc(PLOTS[k].short)}</span><b>Licencia ${t.toLowerCase()}</b><span class="hint">${d}</span></div></div>`,[{label:'Continuar',value:null,primary:true}],false);
+    else await sleep(900);
+    return f;
+  },
+  decide:async(p,kind,d)=>{
+    if(kind==='land'){
+      if(d.plots.length===1){ const k=d.plots[0]; return modal(deedHTML(k,`<p class="hint" style="margin:0">Tienes ${p.cash} dinares. Si compras el solar, colocas tu banderín.</p>`),[{label:`Comprar solar por ${PLOTS[k].land}`,value:k,primary:true},{label:'No comprar',value:null}],false); }
+      return modal(`<h3 style="margin:0 0 6px;font-family:var(--f-display)">Hay solares libres junto a ti</h3><p class="hint">Tienes ${p.cash} dinares. Pulsa un nombre en el tablero para ver su tarjeta.</p>`,
+        d.plots.map(k=>({label:`${PLOTS[k].short} · ${PLOTS[k].land}`,value:k})).concat([{label:'No comprar',value:null}]),false);
+    }
+    if(kind==='build'){
+      let k=d.plots[0];
+      if(d.plots.length>1){
+        k=await modal(`<h3 style="margin:0 0 6px;font-family:var(--f-display)">¿Dónde quieres construir?</h3><p class="hint">Tienes ${p.cash} dinares.${d.noPermit?' Esta vez no hace falta el dado del Diwan.':' Después tirarás el dado del Diwan.'}</p>`,
+          d.plots.map(j=>({label:`${PLOTS[j].short} · nivel ${G.level[j]}/3`,value:j})).concat([{label:'No construir',value:null}]),false);
+        if(k==null) return null;
+      }
+      const pl=PLOTS[k], lv=G.level[k]; const opts=[];
+      for(let n=1;n<=3-lv;n++){ const c=stageSum(pl,lv,n); if(c<=p.cash) opts.push({label:n===1?`Fase ${lv+1}: ${pl.stages[lv]} · ${c}`:`Fases ${lv+1}–${lv+n} · ${c}`, value:{plot:k,stages:n}, primary:n===1}); }
+      opts.push({label:'No construir',value:null});
+      return modal(`<div class="gcard ${pl.t}"><div class="gcard-top">${icon(pl.icon)}<div><div class="k">Construir · tienes ${p.cash}</div><h3>${esc(pl.name)}</h3></div></div><div class="gcard-body">${figsRow(pl,lv,p.color)}<p class="hint" style="margin:0">${d.noPermit?'Licencia exprés: no tiras el dado del Diwan.':'Después tirarás el dado del Diwan: 3 caras aprueban, 1 deniega, 1 pide el doble y 1 es un waqf que paga la primera fase.'}</p></div></div>`,opts,false);
+    }
+    if(kind==='double') return modal(`<div class="permit"><div class="face">${permitSVG('x2',46)}</div><div><b>El Diwan pide el doble</b><span class="hint">Construir te costaría ${d.total} en lugar de ${d.total/2}. Tienes ${p.cash}.</span></div></div>`,[{label:`Pagar ${d.total}`,value:true,primary:true},{label:'Renunciar',value:false}],false);
+    if(kind==='doors'){ await sleep(100); return startPick(p,d); }
+    if(kind==='donate'){ const inf=SPECIAL_INFO.sadaqa; return modal(`<div class="gcard soc"><div class="gcard-top">${icon('hand')}<div><div class="k">Sadaqa</div><h3>Dar caridad</h3></div></div><div class="gcard-body"><q>La caridad no disminuye la riqueza.</q><cite>Hadiz · Muslim 2588</cite><p class="hint" style="margin:0">Das ${d.cost} al Bayt al-Mal y ganas 1 quesito de buenas obras. Tienes ${p.cash}.</p></div></div>`,[{label:`Dar ${d.cost} · +1 quesito`,value:true,primary:true},{label:'Ahora no',value:false}],false); }
+    return false;
+  },
+  showCard:async(p,c,deck,choices)=>{
+    setEvent(`<span class="k">${deck==='rec'?'Recordatorio':'Sucesos'} · ${esc(p.name)}</span><b>${esc(c.title)}.</b> ${esc(c.text)}${c.src?` <i>(${esc(c.src)})</i>`:''}`);
+    await drawCardFX(deck);
+    if(isAI(CTX,p)){ await sleep(deck==='rec'?2400:1700); return null; }
+    const fx=choices?`<div class="fx">${c.offer?.type==='forgive'?'Puedes condonar una deuda que te deben y ganar 1 quesito de buenas obras.':`Puedes dar ${c.offer.cost} al Bayt al-Mal y ganar 1 quesito de buenas obras.`}</div>`:'';
+    return modal(cardHTML(c,deck,fx),choices||[{label:'Continuar',value:null,primary:true}],false);
+  },
+  endTurn:async(p)=>{ if(!isAI(CTX,p)) await waitFor('end'); else await sleep(600); },
+  progress:G=>G.mode==='time'?Math.min(1,1-G.timeLeft/G.totalMs):Math.min(1,(G.round-1)/G.maxRounds),
+  timeUp:G=>G.mode==='time'?G.timeLeft<=0:G.round>G.maxRounds,
+};
+function makeCtx(gen){
+  const guard=()=>{ if(gen!==GEN) throw 'abort'; };
+  const x={};
+  for(const [k,f] of Object.entries(BASE)){
+    if(typeof f!=='function') x[k]=f;
+    else if(['log','update'].includes(k)) x[k]=(...a)=>{ if(gen===GEN) return f(...a); };
+    else if(['progress','timeUp'].includes(k)) x[k]=f;
+    else x[k]=async(...a)=>{ guard(); const r=await f(...a); guard(); return r; };
+  }
+  return x;
+}
+let CTX=makeCtx(0);
+
+function fmtTime(ms){ const s=Math.max(0,Math.ceil(ms/1000)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), ss=s%60; return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(ss).padStart(2,'0'); }
+function tickClock(){
+  const now=performance.now(), dt=now-lastTick; lastTick=now;
+  if(!G || G.mode!=='time') return;
+  if(!paused && !G.over && !G.overtime) G.timeLeft-=dt;
+  $('#clockT').textContent = G.overtime?'Prórroga':fmtTime(G.timeLeft);
+  if(G.timeLeft<=0 && !G.lastRound && !G.over){ G.lastRound=true; pushLog('Se acabó el tiempo. Se termina la ronda en curso.','pay'); renderActions(); }
+}
+
+/* ====================== PARTIDA ====================== */
+async function startGame(cfg){
+  lastSetup=cfg;
+  const seats=cfg.seats.filter(s=>s.kind!=='none');
+  const [m,v]=cfg.win.split(':');
+  const opts = m==='rounds'?{mode:'rounds',maxRounds:+v} : m==='target'?{mode:'target',target:+v,maxRounds:80} : {mode:'time',totalMs:(+v)*60000};
+  const myG=newGame(seats,cfg.rules,opts);
+  GEN++; G=myG; LOG=[]; waiters={}; PICK=null; paused=false; $('#btnPause').textContent='Pausa'; $('#log').innerHTML='';
+  if(m==='target'){ BASE.timeUp=G=>G.round>G.maxRounds; } else BASE.timeUp=G=>G.mode==='time'?G.timeLeft<=0:G.round>G.maxRounds;
+  setEvent(`<span class="k">Bismillah</span>Cada jugador recibe ${G.R.startCash} dinares. ${m==='rounds'?`Gana quien tenga más quesitos al acabar la ronda ${v}.`:m==='target'?`Gana el primero que llegue a ${v} quesitos.`:`Gana quien tenga más quesitos cuando acabe el tiempo.`}`);
+  renderAll(); lastTick=performance.now();
+  const gen=++GEN; CTX=makeCtx(gen);
+  try{ await runGame(myG,CTX); }catch(e){ if(e!=='abort') console.error(e); return; }
+  if(G===myG) gameOver();
+}
+function gameOver(){
+  renderAll();
+  const rk=ranking(G);
+  $('#setupBody').innerHTML=`<h2>${G.shared?'Empate compartido':`Gana ${esc(G.players[G.winner].name)}`}</h2>
+    <p class="lead">${G.overtime?'Decidido en la prórroga.':G.mode==='target'?`Primero en llegar a ${G.target} quesitos.`:'Al terminar la partida.'} ${G.round-1} rondas jugadas. El Bayt al-Mal terminó con ${G.bm} dinares.</p>
+    <div class="rank">${rk.map(r=>`<div class="r ${r.p.id===G.winner?'win':''}"><span class="pawn" style="--pc:${r.p.color}">${esc(r.p.name[0])}</span><span><b>${esc(r.p.name)}</b><br><small class="hint">${ownedList(G,r.p.id,'soc').filter(pl=>G.level[pl.i]).length} entidades en marcha · ${r.p.deeds} buenas obras · ${r.p.cash} dinares</small></span><b>${r.s}</b></div>`).join('')}</div>
+    <div class="sheet-foot"><button class="btn" id="goClose">Ver tablero</button><button class="btn primary" id="goAgain">Nueva partida</button></div>`;
+  $('#setup').hidden=false;
+  $('#goClose').onclick=()=>$('#setup').hidden=true;
+  $('#goAgain').onclick=openSetup;
+}
+function abortCurrent(){
+  if(!G) return; G.over=true;
+  if(PICK){ const r=PICK.res; PICK=null; showCandidates(null); r([]); }
+  Object.keys(waiters).forEach(k=>{ const r=waiters[k]; waiters[k]=null; r&&r(); });
+  $('#modal').hidden=true; paused=false; pauseWaiters.splice(0).forEach(r=>r());
+}
+function openSetup(){
+  const prev=lastSetup||{seats:[{name:'Tú',kind:'human'},{name:'Aisha',kind:'generosa'},{name:'Bilal',kind:'emprendedora'},{name:'Zaynab',kind:'prudente'}],win:'rounds:25',rules:{}};
+  const R=Object.assign({},DEFAULT_RULES,prev.rules);
+  const kinds=[['human','Humano'],['prudente','IA Prudente'],['emprendedora','IA Emprendedora'],['generosa','IA Generosa'],['none','Vacío']];
+  const wins=[['rounds:25','25 rondas','Unos 60 min con 4 jugadores. Gana quien tenga más quesitos al terminar.'],['rounds:15','15 rondas','Partida corta, unos 35 min.'],['rounds:35','35 rondas','Partida larga, cerca de 90 min.'],['target:15','Meta: 15 quesitos','Gana el primero que llegue.'],['target:20','Meta: 20 quesitos','Gana el primero que llegue.'],['time:60','Reloj: 1 hora','La regla original: gana quien tenga más al sonar la hora.']];
+  $('#setupBody').innerHTML=`
+    <h2>Nueva partida</h2>
+    <p class="lead">De 2 a 4 jugadores. Juega contra hasta tres IA o por turnos en el mismo ordenador.</p>
+    <div class="seats">${prev.seats.map((s,k)=>`<div class="seat" style="--pc:${PLAYER_COLORS[k]}">
+      <label for="sn${k}">Jugador ${k+1}</label><input type="text" id="sn${k}" value="${esc(s.name)}" maxlength="14">
+      <select id="sk${k}" aria-label="Tipo del jugador ${k+1}">${kinds.map(([v,l])=>`<option value="${v}" ${s.kind===v?'selected':''}>${l}</option>`).join('')}</select></div>`).join('')}</div>
+    <h3>Cómo se gana</h3>
+    <div class="seg">${wins.map(([v,l,d])=>`<label><input type="radio" name="win" value="${v}" ${prev.win===v?'checked':''}><span><b>${l}</b><small>${d}</small></span></label>`).join('')}</div>
+    <h3>Economía</h3>
+    <div class="fields">
+      <div class="field"><label for="fCash">Dinero inicial</label><input type="number" id="fCash" min="500" max="5000" step="50" value="${R.startCash}"></div>
+      <div class="field"><label for="fSal">Sueldo en Bab al-Madina</label><input type="number" id="fSal" min="0" max="800" step="10" value="${R.salary}"></div>
+      <div class="field"><label for="fRate">Multiplicador de estancias</label><input type="number" id="fRate" min="0.5" max="6" step="0.5" value="${R.rateMul}"></div>
+      <div class="field"><label for="fDoor">Precio de una puerta</label><input type="number" id="fDoor" min="0" max="300" step="10" value="${R.doorCost}"></div>
+    </div>
+    <h3>Reglas añadidas</h3>
+    <div class="toggles">${[['zakat','Zakat','2,5 % de la riqueza neta al pasar por Bab al-Madina, si supera el nisab.'],['sadaqa','Sadaqa','Donar al Bayt al-Mal da quesitos de buenas obras.'],['forgive','Condonar deudas','Quien perdona una deuda gana un quesito (Corán 2:280).'],['inauguration','Inauguración','Cada fase construida en una entidad da 1 quesito.']].map(([k,l,d])=>`<label class="toggle"><input type="checkbox" id="r_${k}" ${R[k]?'checked':''}><span><b>${l}</b><small>${d}</small></span></label>`).join('')}</div>
+    <div class="sheet-foot">${G&&!G.over?'<button class="btn" id="suCancel">Cancelar</button>':''}<button class="btn primary" id="suGo">Empezar partida</button></div>`;
+  $('#setup').hidden=false;
+  if($('#suCancel')) $('#suCancel').onclick=()=>$('#setup').hidden=true;
+  $('#suGo').onclick=()=>{
+    const seats=[0,1,2,3].map(k=>({name:($('#sn'+k).value.trim()||`Jugador ${k+1}`),kind:$('#sk'+k).value,seat:k}));
+    if(seats.filter(s=>s.kind!=='none').length<2){ $('#suGo').textContent='Hacen falta 2 jugadores'; setTimeout(()=>$('#suGo').textContent='Empezar partida',1600); return; }
+    const rules={startCash:+$('#fCash').value||1500, salary:+$('#fSal').value||0, rateMul:+$('#fRate').value||2.5, doorCost:+$('#fDoor').value||0};
+    ['zakat','sadaqa','forgive','inauguration'].forEach(k=>rules[k]=$('#r_'+k).checked);
+    const win=(document.querySelector('input[name=win]:checked')||{}).value||'rounds:25';
+    $('#setup').hidden=true; abortCurrent(); startGame({seats,win,rules});
+  };
+}
+
+/* ====================== REGLAS ====================== */
+function openRules(){
+  const R=Object.assign({},DEFAULT_RULES,lastSetup?.rules||{});
+  $('#rulesBody').innerHTML=`
+  <h2>Reglas de Jalifa</h2>
+  <p class="lead">Jalifa (خليفة) significa «custodio»: el Corán dice que el ser humano es jalifa en la tierra (2:30). Aquí custodias una ciudad. Lo marcado como <span class="tag">Añadido</span> no estaba en las reglas originales y se puede ajustar.</p>
+  <h3>Objetivo</h3>
+  <ul><li>Dar el mayor beneficio social a la ciudad. Se mide en <b>quesitos</b>.</li>
+  <li>Las empresas dan dinero. Con ese dinero se construyen entidades sociales, que dan quesitos cuando los demás usan sus servicios.</li></ul>
+  <h3>Cómo se gana <span class="tag">Añadido</span></h3>
+  <ul><li><b>Por rondas</b> (recomendado): la partida dura un número fijo de rondas. 25 rondas son unos 60 minutos con 4 jugadores. Gana quien tenga más quesitos al terminar la última.</li>
+  <li><b>Meta de quesitos:</b> gana el primero que llegue a la cifra acordada.</li>
+  <li><b>Reloj</b> (regla original): al sonar la hora se termina la ronda en curso y gana quien tenga más.</li>
+  <li>Si hay empate, solo siguen los empatados. Gana el primero que consiga otro quesito.</li></ul>
+  <h3>El tablero</h3>
+  <ul><li>Una calle de ${N} casillas recorre la ciudad. A ambos lados hay <b>solares</b>: 10 de empresas y 14 de entidades sociales.</li>
+  <li>Se tiran dos dados y se avanza por la calle en el sentido de las agujas del reloj.</li>
+  <li>Al pasar por Bab al-Madina se cobra un sueldo de ${R.salary} <span class="tag">Añadido</span>.</li></ul>
+  <h3>1 · Comprar un solar</h3>
+  <ul><li>Si caes en una casilla junto a un solar libre, puedes comprarlo. Colocas tu banderín.</li></ul>
+  <h3>2 · Construir</h3>
+  <ul><li>Cada solar admite un edificio en <b>tres fases</b>: cada una es una pieza que se añade a la maqueta.</li>
+  <li>Puedes construir cuando caes junto a tu solar o en el <b>Diwan</b>, que te deja construir en cualquiera de tus solares.</li>
+  <li>Para construir pides licencia con el <b>dado del Diwan</b>: 3 caras la aprueban, 1 la deniega, 1 pide el doble y 1 es un waqf: un benefactor paga la primera fase.</li>
+  <li>Puedes construir varias fases de golpe con una sola licencia.</li></ul>
+  <h3>3 · Abrir puertas</h3>
+  <ul><li>Un edificio sin puertas no recibe a nadie. Cada puerta cuesta ${R.doorCost} y se coloca en una casilla de calle junto al solar. Una casilla solo admite una puerta.</li>
+  <li>Puedes abrir puertas justo después de construir, al caer junto a tu edificio o en el Diwan. La casilla <b>Puerta libre</b> da una gratis.</li></ul>
+  <h3>4 · Caer en una puerta ajena</h3>
+  <ul><li><b>Empresa:</b> usas sus servicios. Tiras un dado y pagas dado × la tarifa de su nivel.</li>
+  <li><b>Entidad social:</b> usas sus servicios gratis. Su dueño gana tantos quesitos como el nivel del edificio, hasta llenar su bandeja de 8.</li>
+  <li><span class="tag">Añadido</span> <b>Inauguración:</b> cada fase construida en una entidad le da 1 quesito.</li>
+  <li><span class="tag">Añadido</span> <b>Waqf:</b> las entidades sociales no se venden. Las empresas sí: el banco paga la mitad de lo invertido.</li></ul>
+  <h3>Casillas especiales</h3>
+  <ul>${Object.values(SPECIAL_INFO).map(s=>`<li><b>${s.name}:</b> ${s.desc}</li>`).join('')}</ul>
+  <h3>Deudas y valores</h3>
+  <ul><li>Si no puedes pagar, pagas lo que tengas y el resto queda como deuda. Con deudas no puedes comprar, construir ni abrir puertas.</li>
+  <li><span class="tag">Añadido</span> <b>Sin riba:</b> las deudas no tienen intereses. El dinero que recibes paga primero lo que debes.</li>
+  <li><span class="tag">Añadido</span> <b>Condonar:</b> perdonar una deuda de 50 o más da un quesito de buenas obras (Corán 2:280).</li>
+  <li><span class="tag">Añadido</span> <b>Zakat:</b> al pasar por Bab al-Madina, si tu dinero menos tus deudas llega a ${R.nisab}, pagas el 2,5 % al Bayt al-Mal.</li>
+  <li><span class="tag">Añadido</span> <b>Nadie queda eliminado</b> y con deudas no se da sadaqa: primero se paga lo que se debe.</li></ul>
+  <h3>Sobre los textos</h3>
+  <p>Las traducciones de aleyas y hadices son aproximadas. Conviene que las revise un especialista antes de imprimir las cartas.</p>
+  <div class="sheet-foot"><button class="btn primary" id="rulesClose">Cerrar</button></div>`;
+  $('#rules').hidden=false; $('#rulesClose').onclick=()=>$('#rules').hidden=true;
+}
+
+/* ====================== LABORATORIO ====================== */
+function openLab(){
+  $('#labBody').innerHTML=`
+    <h2>Laboratorio de equilibrio</h2>
+    <p class="lead">Simula cientos de partidas entre IA con la economía de la última configuración para ver si el juego funciona: quién gana, qué solares rinden y cuántas partidas acaban en prórroga.</p>
+    <div class="fields">
+      <div class="field"><label for="lN">Partidas</label><select id="lN"><option>100</option><option selected>300</option><option>1000</option></select></div>
+      <div class="field"><label for="lP">Jugadores</label><select id="lP"><option>2</option><option>3</option><option selected>4</option></select></div>
+      <div class="field"><label for="lR">Rondas</label><input type="number" id="lR" value="25" min="5" max="80"></div>
+    </div>
+    <div class="sheet-foot" style="justify-content:flex-start"><button class="btn primary" id="lRun">Simular</button><button class="btn" id="lClose">Cerrar</button></div>
+    <div class="progress" hidden id="lProg"><i></i></div><div id="lOut"></div>`;
+  $('#lab').hidden=false; $('#lClose').onclick=()=>$('#lab').hidden=true; $('#lRun').onclick=runLab;
+}
+async function simulate(n,np,rounds,rules,onProg){
+  const profs=['prudente','emprendedora','generosa'];
+  const A={wins:{prudente:0,emprendedora:0,generosa:0},seats:{prudente:0,emprendedora:0,generosa:0},seatWins:Array(np).fill(0),win:0,all:0,margin:0,ot:0,shared:0,debt:0,cash:0,zakat:0,sadaqa:0,forgive:0,
+    own:Array(PLOTS.length).fill(0),lvl:Array(PLOTS.length).fill(0),doors:Array(PLOTS.length).fill(0),q:Array(PLOTS.length).fill(0),rent:Array(PLOTS.length).fill(0),inv:Array(PLOTS.length).fill(0),permits:{ok:0,no:0,x2:0,free:0}};
+  const x={sim:true,log(){},update(){},wait:async()=>{},step:async()=>{},changed:async()=>{},endTurn:async()=>{},showCard:async()=>null,decide:async()=>false,
+    rollDice:async()=>[1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)],rollStay:async()=>1+Math.floor(Math.random()*6),
+    permitRoll:async()=>PERMIT_FACES[Math.floor(Math.random()*6)],progress:G=>Math.min(1,(G.round-1)/G.maxRounds),timeUp:G=>G.round>G.maxRounds};
+  for(let g=0;g<n;g++){
+    const seats=Array.from({length:np},(_,k)=>({name:'IA'+(k+1),kind:profs[(g+k)%3],seat:k}));
+    const S=newGame(seats,rules,{mode:'rounds',maxRounds:rounds}); await runGame(S,x);
+    const rk=ranking(S);
+    S.players.forEach(p=>{ A.seats[p.kind]++; A.all+=score(S,p); A.cash+=p.cash; });
+    if(!S.shared){ A.wins[S.players[S.winner].kind]++; A.seatWins[S.winner]++; A.win+=score(S,S.players[S.winner]); }
+    A.margin+=rk[0].s-(rk[1]?.s||0); if(S.overtime)A.ot++; if(S.shared)A.shared++; if(S.stats.debtEver.size)A.debt++;
+    A.zakat+=S.stats.zakat; A.sadaqa+=S.stats.sadaqa; A.forgive+=S.stats.forgive;
+    PLOTS.forEach(pl=>{ if(S.owner[pl.i]!=null){ A.own[pl.i]++; A.lvl[pl.i]+=S.level[pl.i]; A.doors[pl.i]+=doorsOf(S,pl.i).length; A.q[pl.i]+=S.tray[pl.i]; A.inv[pl.i]+=pl.land+stageSum(pl,0,S.level[pl.i]); } A.rent[pl.i]+=S.stats.rent[pl.i]; });
+    if(g%20===19&&onProg){ onProg((g+1)/n); await new Promise(r=>setTimeout(r,0)); }
+  }
+  applyRates(G?G.R:Object.assign({},DEFAULT_RULES,lastSetup?.rules||{}));
+  return A;
+}
+async function runLab(){
+  const n=+$('#lN').value, np=+$('#lP').value, rounds=Math.max(5,+$('#lR').value||25);
+  const rules=Object.assign({},DEFAULT_RULES,lastSetup?.rules||{});
+  $('#lRun').disabled=true; $('#lProg').hidden=false;
+  const A=await simulate(n,np,rounds,rules,f=>$('#lProg i').style.width=(f*100)+'%');
+  $('#lProg i').style.width='100%'; $('#lRun').disabled=false;
+  const pct=x=>Math.round(x*100)+'%', f1=x=>(Math.round(x*10)/10).toLocaleString('es-ES'), dec=n-A.shared;
+  const row=pl=>{ const b=Math.max(1,A.own[pl.i]); return `<tr><td>${esc(pl.short)}</td><td>${pl.land}</td><td>${pct(A.own[pl.i]/n)}</td><td>${A.own[pl.i]?f1(A.lvl[pl.i]/b):'–'}</td><td>${A.own[pl.i]?f1(A.doors[pl.i]/b):'–'}</td><td>${pl.t==='soc'?(A.own[pl.i]?f1(A.q[pl.i]/b):'–'):(A.own[pl.i]?f1(A.rent[pl.i]/b):'–')}</td><td>${A.own[pl.i]?f1(A.inv[pl.i]/b):'–'}</td></tr>`; };
+  $('#lOut').innerHTML=`
+    <h3>Resumen · ${n} partidas de ${rounds} rondas</h3>
+    <div class="kpis">
+      <div class="kpi"><b>${f1(A.win/Math.max(1,dec))}</b><small>quesitos del ganador</small></div>
+      <div class="kpi"><b>${f1(A.all/(n*np))}</b><small>quesitos por jugador</small></div>
+      <div class="kpi"><b>${f1(A.margin/n)}</b><small>ventaja del 1.º sobre el 2.º</small></div>
+      <div class="kpi"><b>${pct(A.ot/n)}</b><small>partidas con prórroga</small></div>
+      <div class="kpi"><b>${pct(A.debt/n)}</b><small>partidas con alguna deuda</small></div>
+      <div class="kpi"><b>${f1(A.cash/(n*np))}</b><small>dinero final por jugador</small></div>
+      <div class="kpi"><b>${f1(A.zakat/n)}</b><small>zakat por partida</small></div>
+      <div class="kpi"><b>${f1(A.sadaqa/n)} · ${f1(A.forgive/n)}</b><small>sadaqas · condonaciones</small></div>
+    </div>
+    <h3>Victorias por perfil de IA</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>Perfil</th><th>Victorias</th><th>Tasa por asiento</th></tr></thead><tbody>${Object.keys(A.wins).map(k=>`<tr><td>${PROFILES[k].label}</td><td>${A.wins[k]}</td><td>${pct(A.wins[k]/Math.max(1,A.seats[k]))}</td></tr>`).join('')}</tbody></table></div>
+    <p class="hint">Referencia justa: ${pct(1/np)}. Por orden de turno: ${A.seatWins.map((w,k)=>`${k+1}.º ${pct(w/Math.max(1,dec))}`).join(' · ')}.</p>
+    <h3>Entidades sociales</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>Entidad</th><th>Solar</th><th>Comprada</th><th>Nivel medio</th><th>Puertas</th><th>Quesitos</th><th>Invertido</th></tr></thead><tbody>${PLOTS.filter(p=>p.t==='soc').map(row).join('')}</tbody></table></div>
+    <h3>Empresas</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>Empresa</th><th>Solar</th><th>Comprada</th><th>Nivel medio</th><th>Puertas</th><th>Cobrado</th><th>Invertido</th></tr></thead><tbody>${PLOTS.filter(p=>p.t==='co').map(row).join('')}</tbody></table></div>
+    <p class="hint">Si «Cobrado» queda muy por debajo de «Invertido», las empresas no compensan en esa duración: sube el multiplicador de estancias o el número de rondas.</p>`;
+}
+
+/* ====================== TUTORIAL ====================== */
+const TUT = [
+  {k:'Bienvenida', t:'Eres el jalifa de la ciudad', target:null,
+   b:()=>`<p>En Jalifa gana quien más <b>beneficio social</b> da a la ciudad. Ese beneficio se mide en <b>quesitos</b>.</p><p>Lo harás en dos pasos: montas <b>empresas</b> para ganar dinero y con ese dinero construyes <b>entidades sociales</b> que sirven a los demás.</p><p class="hint">El tutorial dura 12 pasos. Puedes cerrarlo cuando quieras y volver desde el botón Tutorial.</p>`},
+  {k:'El tablero', t:'Una calle y sus solares', target:'#scene',
+   b:()=>`<p>Arrastra para girar la mesa, usa la rueda o pellizca para acercarte. La franja de casillas claras es la <b>calle</b>: ${N} casillas que dan la vuelta a la ciudad. A sus lados están los <b>solares</b>.</p><ul><li>Los nombres en <b style="color:#23508E">azul</b> son empresas.</li><li>Los nombres en <b style="color:#1E6B52">verde</b> son entidades sociales.</li></ul><p>Pulsa cualquier solar para ver su tarjeta de propiedad.</p>`},
+  {k:'Moverse', t:'Tira dos dados y avanza', target:'road:0',
+   b:()=>`<p>Todos empiezan en <b>Bab al-Madina</b>, la puerta de la ciudad. En tu turno tiras dos dados y avanzas en el sentido de las agujas del reloj.</p><p>Cada vez que pasas por aquí cobras tu sueldo. Si tienes suficiente dinero, pagas el zakat: el 2,5 % va al Bayt al-Mal.</p>`},
+  {k:'Paso 1', t:'Compra un solar', target:'plot:15',
+   b:()=>`<p>Si caes en una casilla de calle <b>junto a un solar libre</b>, puedes comprarlo. Colocas tu banderín y el solar es tuyo.</p><div class="illus"><div><svg viewBox="-12 -40 40 46" width="46">${flagSVG('#C0392B')}</svg>Banderín</div></div><p>Un solar vacío todavía no hace nada: hay que construir.</p>`},
+  {k:'Paso 2', t:'Construye en tres fases', target:'plot:14',
+   b:()=>{ const pl=PLOTS[KEY.mezquita]; return `<p>Cada edificio se levanta en <b>tres fases</b>. Cada fase es una pieza que se añade a la maqueta. Así será en el juego físico.</p>${figsRow(pl,3,'#1F7A4D')}<p>Puedes construir cuando caes junto a tu solar o en cualquier casilla <b>Diwan</b>.</p>`; }},
+  {k:'Paso 2', t:'El dado del Diwan', target:'#d3',
+   b:()=>`<p>Antes de construir pides licencia al Diwan tirando su dado:</p><div class="illus">${['ok','no','x2','free'].map(f=>`<div>${permitSVG(f,36)}${PERMIT_TEXT[f][0]}${f==='ok'?' ×3':''}</div>`).join('')}</div><ul><li><b>Aprobada</b> (3 caras): pagas el precio normal.</li><li><b>Denegada</b>: hoy no se construye.</li><li><b>Doble</b>: pagas el doble o renuncias.</li><li><b>Waqf</b>: un benefactor paga la primera fase.</li></ul>`},
+  {k:'Paso 3', t:'Abre puertas a la calle', target:'#scene',
+   b:()=>`<p>Un edificio sin puertas no recibe a nadie. Las puertas son arcos de herradura que se colocan en las casillas de calle junto a tu edificio.</p><div class="illus"><svg viewBox="-14 -16 28 30" width="44">${`<path d="M-9 10 V0 A9.5 9.5 0 1 1 9 0 V10 Z" fill="#C0392B" stroke="#2B1D12" stroke-width="1.3"/><path d="M-4.6 10 V1.6 A5 5 0 1 1 4.6 1.6 V10 Z" fill="#2B1D12"/>`}</svg></div><p>Cuantas más puertas, más gente entra. Pero cada casilla solo admite una puerta: los vecinos compiten por la misma calle. Cuando abras puertas, la mesa marcará en dorado las casillas donde puedes ponerlas: tócalas para elegirlas.</p>`},
+  {k:'Empresas', t:'Quien entra en tu empresa paga', target:'plot:4',
+   b:()=>`<p>Si otro jugador cae en una casilla con la puerta de tu empresa, usa sus servicios: tira un dado y te paga <b>dado × la tarifa</b> de su nivel.</p><p>Por ejemplo, Transportes a nivel 2 cobra dado × ${PLOTS[KEY.transportes].rate?.[1] ?? '–'}. Cuanto más construyes, más cobras.</p>`},
+  {k:'Entidades', t:'Quien entra en tu entidad suma quesitos', target:'plot:19',
+   b:()=>`<p>Si otro jugador cae en una puerta de tu entidad social, la usa gratis y tú ganas tantos quesitos como su nivel: 1, 2 o 3.</p><p>Además, cada fase que construyes en una entidad da 1 quesito de inauguración. Cada entidad tiene una bandeja de 8 huecos.</p><div class="illus"><svg viewBox="0 0 70 10" width="160">${Array.from({length:8},(_,j)=>`<circle cx="${5+j*8.5}" cy="5" r="3.4" fill="${j<5?'#1F7A4D':'#FBF4E2'}" stroke="#2B1D12" stroke-width=".8"/>`).join('')}</svg></div>`},
+  {k:'Casillas especiales', t:'Cartas, viajes y el tesoro', target:'road:34',
+   b:()=>`<ul><li><b>Recordatorio:</b> aleyas y hadices sobre las buenas obras.</li><li><b>Sucesos:</b> favorecen a unos y perjudican a otros.</li><li><b>Contratiempo:</b> pierdes un turno.</li><li><b>Avión y tren:</b> te llevan al otro aeropuerto o estación.</li><li><b>Sadaqa:</b> donas y ganas un quesito de buenas obras.</li><li><b>Bayt al-Mal:</b> el tesoro público ayuda a quien tiene deudas o pasa necesidad.</li></ul>`},
+  {k:'Deudas', t:'Sin intereses y sin eliminados', target:'#playersPanel',
+   b:()=>`<p>Si no puedes pagar, pagas lo que tengas y el resto queda como deuda <b>sin intereses</b>. Con deudas no puedes comprar ni construir. El dinero que recibas paga primero lo que debes.</p><p>Quien perdona una deuda gana un quesito de buenas obras. Nadie queda eliminado.</p>`},
+  {k:'Final', t:'Cómo se gana', target:'#status',
+   b:()=>`<p>Antes de empezar se elige el modo:</p><ul><li><b>Por rondas</b> (recomendado): gana quien tenga más quesitos al acabar la última ronda.</li><li><b>Meta:</b> gana el primero que llegue a la cifra acordada.</li><li><b>Reloj:</b> gana quien tenga más cuando suene la hora.</li></ul><p>Si hay empate, solo siguen los empatados y gana el primero que sume otro quesito.</p>`},
+];
+let tutStep=0, tutHL=null;
+function tutClear(){ if(tutHL){ tutHL.classList.remove('tut-hl-html'); tutHL=null; } if(V3.R) tutMark(null); }
+function tutShow(i){
+  tutStep=Math.max(0,Math.min(TUT.length-1,i)); const s=TUT[tutStep]; tutClear();
+  const box=$('#tut');
+  box.innerHTML=`<div class="tut-top"><div class="k">${s.k} · ${tutStep+1} de ${TUT.length}</div><h3>${s.t}</h3></div><div class="tut-body">${s.b()}</div>
+    <div class="tut-foot"><span class="dots">${TUT.map((_,j)=>`<i class="${j===tutStep?'on':''}"></i>`).join('')}</span><button class="btn small" id="tPrev" ${tutStep?'':'disabled'}>Anterior</button>${tutStep<TUT.length-1?`<button class="btn small primary" id="tNext">Siguiente</button>`:`<button class="btn small primary" id="tPlay">Jugar</button>`}<button class="btn small" id="tClose" aria-label="Cerrar tutorial">Cerrar</button></div>`;
+  box.hidden=false;
+  if(s.target){
+    const m=s.target.match(/^(plot|road):(\d+)$/);
+    if(m){ if(V3.R) tutMark(m[1],+m[2]); $('#scene').scrollIntoView({block:'nearest',behavior:'smooth'}); }
+    else { const el=document.querySelector(s.target); if(el){ tutHL=el; el.classList.add('tut-hl-html'); el.scrollIntoView({block:'nearest',behavior:'smooth'}); } }
+  }
+  $('#tPrev').onclick=()=>tutShow(tutStep-1);
+  if($('#tNext')) $('#tNext').onclick=()=>tutShow(tutStep+1);
+  if($('#tPlay')) $('#tPlay').onclick=()=>{ tutClose(); if(!G||G.over) openSetup(); };
+  $('#tClose').onclick=tutClose;
+  try{ localStorage.setItem('jalifa3d-tut','1'); }catch(e){}
+}
+function tutClose(){ tutClear(); $('#tut').hidden=true; }
+
+/* ====================== ARRANQUE ====================== */
+$('#btnTut').onclick=()=>{ $('#setup').hidden=true; tutShow(0); };
+$('#btnRules').onclick=openRules;
+$('#btnLab').onclick=openLab;
+$('#btnNew').onclick=openSetup;
+$('#btnPause').onclick=()=>{ paused=!paused; $('#btnPause').textContent=paused?'Reanudar':'Pausa'; if(!paused) pauseWaiters.splice(0).forEach(r=>r()); };
+$('#speedSel').onchange=e=>{ SPEED=parseFloat(e.target.value)||1; try{localStorage.setItem('jalifa3d-speed',String(SPEED));}catch(_){} };
+applyRates(DEFAULT_RULES);
+renderActions(); renderPlayers();
+init3D().then(ok=>{ if(ok) renderBoard3D(); });
+$('#v3d').onclick=()=>setView('3d'); $('#vtop').onclick=()=>setView('top');
+$('#vfollow').onclick=e=>{ V3.follow=!V3.follow; e.currentTarget.setAttribute('aria-pressed',V3.follow); if(V3.follow&&G){ const [x,z]=cellXZ(G.players[G.cur].pos); focusOn(x,z,10); } };
+setDie($('#d1'),4); setDie($('#d2'),3); setSpecial(permitSVG('ok'),'Dado del Diwan');
+setEvent(`<span class="k">Prototipo</span>Construye una ciudad justa: las empresas dan dinero y las entidades sociales dan beneficio a la gente.`);
+lastTick=performance.now(); setInterval(tickClock,250);
+let seenTut=false; try{ seenTut=localStorage.getItem('jalifa3d-tut')==='1'; }catch(e){}
+if(seenTut) openSetup(); else tutShow(0);
+
+</script>
+</body></html>
